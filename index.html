@@ -2,28 +2,25 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>CJ SHOP</title>
+<title>BIENVENUE IN CJ SHOP</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body style="background:#0f0f0f;color:white;text-align:center;font-family:sans-serif;padding-top:40px;">
 
 <h2>CJ SHOP</h2>
-
 <div id="content"></div>
 
 <script>
-const tg = window.Telegram.WebApp;
+var tg = window.Telegram.WebApp;
 tg.expand();
 
-const user = tg.initDataUnsafe?.user;
+var orderId = "CJ" + Math.floor(Math.random()*1000000);
+var priceUSD = 50;
 
-const BTC_ADDRESS = "TON_ADRESSE_BTC_ICI";
-const ETH_ADDRESS = "TON_ADRESSE_ETH_ICI";
-const USDT_TRC20_ADDRESS = "TON_ADRESSE_USDT_TRC20_ICI";
-
-const orderId = "CJ" + Math.floor(Math.random()*1000000);
-const priceUSD = 50;
+var BTC_ADDRESS = "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz";
+var ETH_ADDRESS = "0x1F3E0A4E2ec341C718d706ACdabad874484033ae";
+var USDT_ADDRESS = "0x1F3E0A4E2ec341C718d706ACdabad874484033ae";
 
 document.getElementById("content").innerHTML = `
 <p>Produit Premium</p>
@@ -37,16 +34,14 @@ document.getElementById("content").innerHTML = `
 
 <p><b>Référence:</b> ${orderId}</p>
 
+<p>⚠️ Envoyez le montant exact.</p>
+
 <button onclick="paid()">J'ai payé</button>
 `;
 
 function paid() {
-  tg.sendData(JSON.stringify({
-    order: orderId,
-    user: user?.id,
-    status: "pending"
-  }));
-  alert("Demande envoyée au support");
+  var message = "Bonjour, j'ai payé la commande " + orderId;
+  window.location.href = "https://t.me/MALUS?text=" + encodeURIComponent(message);
 }
 </script>
 
