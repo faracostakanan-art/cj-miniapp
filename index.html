@@ -9,40 +9,46 @@
 <body style="background:#0f0f0f;color:white;text-align:center;font-family:sans-serif;padding-top:40px;">
 
 <h2>CJ SHOP</h2>
-<div id="content"></div>
+<div id="content">Chargement...</div>
 
 <script>
-var tg = window.Telegram.WebApp;
-tg.expand();
 
-var orderId = "CJ" + Math.floor(Math.random()*1000000);
-var priceUSD = 50;
+function startApp() {
 
-var BTC_ADDRESS = "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz";
-var ETH_ADDRESS = "0x1F3E0A4E2ec341C718d706ACdabad874484033ae";
-var USDT_ADDRESS = "0x1F3E0A4E2ec341C718d706ACdabad874484033ae";
+  var orderId = "CJ" + Math.floor(Math.random()*1000000);
+  var priceUSD = 50;
 
-document.getElementById("content").innerHTML = `
-<p>Produit Premium</p>
-<p>Prix: ${priceUSD} USD</p>
+  var BTC_ADDRESS = "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz";
+  var ETH_ADDRESS = "0x1F3E0A4E2ec341C718d706ACdabad874484033ae";
+  var USDT_ADDRESS = "0x5A652C891ee6F1cAF45c829A0e42f81856524939";
 
-<h3>Paiement</h3>
+  document.getElementById("content").innerHTML = `
+  <p>Produit Premium</p>
+  <p>Prix: ${priceUSD} USD</p>
 
-<p><b>BTC</b><br>${bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz}</p>
-<p><b>ETH</b><br>${0x1F3E0A4E2ec341C718d706ACdabad874484033ae}</p>
-<p><b>USDT TRC20</b><br>${0x1F3E0A4E2ec341C718d706ACdabad874484033ae}</p>
+  <h3>Paiement</h3>
 
-<p><b>Référence:</b> ${orderId}</p>
+  <p><b>BTC</b><br>${BTC_ADDRESS}</p>
+  <p><b>ETH</b><br>${ETH_ADDRESS}</p>
+  <p><b>USDT TRC20</b><br>${USDT_ADDRESS}</p>
 
-<p>⚠️ Envoyez le montant exact.</p>
+  <p><b>Référence:</b> ${orderId}</p>
 
-<button onclick="paid()">J'ai payé</button>
-`;
+  <p>⚠️ Envoyez le montant exact.</p>
 
-function paid() {
-  var message = "Bonjour, j'ai payé la commande " + orderId;
-  window.location.href = "https://t.me/MALUS?text=" + encodeURIComponent(message);
+  <button onclick="paid('${orderId}')">J'ai payé</button>
+  `;
 }
+
+function paid(orderId) {
+  var message = "Bonjour, j'ai payé la commande " + orderId;
+  window.location.href = "https://t.me/@o0h01?text=" + encodeURIComponent(message);
+}
+
+window.onload = function() {
+  startApp();
+};
+
 </script>
 
 </body>
