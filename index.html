@@ -3,36 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJAYSHOP</title>
+<title>CJBOT</title>
 
 <style>
+
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box;}
+
 body{
-margin:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:#0b0f14;
+background:radial-gradient(circle at top,#1e293b,#0b1220 70%);
 color:white;
 }
 
-.app{padding:20px 20px 100px 20px;}
+/* ================= HOME ================= */
 
-.topbar{
+.app{padding:24px;}
+
+.header{text-align:center;margin-bottom:40px;}
+
+.avatar{
+width:80px;height:80px;
+background:linear-gradient(135deg,#3b82f6,#2563eb);
+border-radius:50%;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:bold;
+}
+
+.card{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(15px);
+border-radius:16px;
+padding:20px;
+margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.balance{
 display:flex;
 justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
 font-size:18px;
+}
+
+.amount{
+color:#3b82f6;
 font-weight:600;
 }
 
-.balance-card{
+.actions button{
+width:100%;
+padding:14px;
+margin-bottom:12px;
+border-radius:14px;
+border:none;
+background:linear-gradient(90deg,#3b82f6,#2563eb);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+}
+
+/* ================= SHOP SCREEN ================= */
+
+.shop-screen{
+position:fixed;
+inset:0;
+background:#000;
+display:none;
+flex-direction:column;
+}
+
+.shop-screen.active{
+display:flex;
+}
+
+.shop-header{
+height:60px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 16px;
 background:#111;
-border-radius:20px;
+font-weight:600;
+}
+
+.shop-header span{
+color:#3b82f6;
+cursor:pointer;
+}
+
+.shop-content{
+flex:1;
+overflow-y:auto;
+padding:16px;
+padding-bottom:90px;
+}
+
+.balance-shop{
+background:#111;
+border-radius:22px;
 padding:30px;
 text-align:center;
 margin-bottom:20px;
 }
 
-.balance-card h1{
+.balance-shop h1{
 font-size:42px;
 margin:10px 0;
 }
@@ -40,47 +119,47 @@ margin:10px 0;
 .tabs{
 display:flex;
 background:#111;
-border-radius:15px;
+border-radius:14px;
 overflow:hidden;
 margin-bottom:20px;
 }
 
-.tabs div{
+.tab{
 flex:1;
-padding:12px;
 text-align:center;
-opacity:0.6;
+padding:12px;
+opacity:.5;
 }
 
-.tabs .active{
-background:#1c1c1c;
+.tab.active{
+background:#1a1a1a;
 opacity:1;
 }
 
 .filter{
 background:#111;
-padding:15px;
-border-radius:15px;
-margin-bottom:15px;
+border-radius:14px;
+padding:14px;
 text-align:center;
+margin-bottom:20px;
 }
 
 .product{
 background:#0f2a17;
-border:2px solid #1f8f4a;
+border:1.5px solid #22c55e;
 border-radius:20px;
-padding:20px;
+padding:18px;
 margin-bottom:20px;
 }
 
-.product-header{
+.badges{
 display:flex;
-gap:10px;
-margin-bottom:15px;
+gap:8px;
+margin-bottom:14px;
 }
 
 .badge{
-padding:4px 10px;
+padding:5px 10px;
 border-radius:10px;
 font-size:12px;
 }
@@ -89,123 +168,123 @@ font-size:12px;
 .gray{background:#333;}
 .orange{background:#8a5a00;}
 
-.product-grid{
+.grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:10px;
-margin:15px 0;
 font-size:14px;
+margin-bottom:15px;
 }
 
 .price{
-font-size:24px;
-font-weight:bold;
+font-size:22px;
+font-weight:700;
+margin-bottom:12px;
 }
 
-.withdraw-btn{
+.btn-green{
 background:#22c55e;
 border:none;
 padding:14px;
-border-radius:15px;
-color:white;
-font-weight:600;
 width:100%;
+border-radius:16px;
+color:#fff;
+font-weight:600;
 cursor:pointer;
 }
 
-.bottom-nav{
+.navbar{
 position:fixed;
 bottom:0;
 left:0;
 right:0;
+height:70px;
 background:#111;
 display:flex;
 justify-content:space-around;
-padding:15px 0;
+align-items:center;
 border-top:1px solid #222;
 }
 
-.bottom-nav div{
+.nav-item{
 text-align:center;
-font-size:13px;
-opacity:0.6;
+font-size:12px;
+opacity:.6;
 }
 
-.bottom-nav .active{
+.nav-item.active{
 opacity:1;
 color:#3b82f6;
 }
 
-button{
-cursor:pointer;
-}
-
-.hidden{display:none;}
-
 </style>
 </head>
-
 <body>
 
-<div id="home" class="app">
+<!-- ================= HOME (IDENTIQUE) ================= -->
 
-<div class="topbar">
-<div>CJAYSHOP</div>
+<div class="app">
+
+<div class="header">
+<div class="avatar">CJ</div>
+<h1>CJBOT</h1>
+<p>Boutique Premium Crypto</p>
 </div>
 
-<div class="balance-card">
-<div>Solde disponible</div>
-<h1>€0.00</h1>
-<div style="opacity:0.5;font-size:14px;">Appuyer pour actualiser</div>
+<div class="card balance">
+<span>Solde</span>
+<span class="amount">0.00€</span>
+</div>
+
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>Pour chaque 500€ rechargés, recevez 90€ bonus.</p>
 </div>
 
 <div class="actions">
-<button onclick="openShop()" style="width:100%;padding:14px;border-radius:15px;border:none;background:#3b82f6;color:white;margin-bottom:10px;">
-🛒 Ouvrir la boutique
-</button>
-
-<button onclick="alert('Recharge')"
-style="width:100%;padding:14px;border-radius:15px;border:none;background:#2563eb;color:white;">
-💳 Recharger
-</button>
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
+<button>💳 Recharger</button>
+<button>📩 Support</button>
 </div>
 
 </div>
 
-<!-- BOUTIQUE -->
+<!-- ================= SHOP ================= -->
 
-<div id="shop" class="app hidden">
+<div id="shop" class="shop-screen">
 
-<div class="topbar">
-<div onclick="goHome()" style="color:#3b82f6;">Fermer</div>
+<div class="shop-header">
+<span onclick="closeShop()">Fermer</span>
 <div>CJAYSHOP</div>
 <div>•••</div>
 </div>
 
-<div class="balance-card">
+<div class="shop-content">
+
+<div class="balance-shop">
 <div>SOLDE DISPONIBLE</div>
 <h1>€0.00</h1>
-<div style="opacity:0.5;font-size:14px;">Appuyer pour actualiser</div>
+<div style="opacity:.5;font-size:14px;">Appuyer pour actualiser</div>
 </div>
 
 <div class="tabs">
-<div class="active">Liste</div>
-<div>Box</div>
+<div class="tab active">Liste</div>
+<div class="tab">Box</div>
 </div>
 
-<div class="filter">🔎 Filtrer</div>
+<div class="filter">Filtrer</div>
 
-<div style="margin-bottom:10px;opacity:0.6;">8 résultats</div>
+<div style="opacity:.5;margin-bottom:10px;">8 résultats</div>
 
 <div class="product">
 
-<div class="product-header">
+<div class="badges">
 <div class="badge purple">PETER</div>
 <div class="badge gray">ANDROID</div>
 <div class="badge orange">5H</div>
 </div>
 
-<div class="product-grid">
+<div class="grid">
 <div><strong>AGE</strong><br>28 ans</div>
 <div><strong>BANQUE</strong><br>Inconnue</div>
 <div><strong>PRÉNOM</strong><br>Michael</div>
@@ -214,33 +293,29 @@ style="width:100%;padding:14px;border-radius:15px;border:none;background:#2563eb
 
 <div class="price">€70.00</div>
 
-<button class="withdraw-btn">RETIRER</button>
+<button class="btn-green">RETIRER</button>
 
 </div>
 
 </div>
 
-<!-- NAVBAR -->
+<div class="navbar">
+<div class="nav-item active">🏠<br>Accueil</div>
+<div class="nav-item">🛒<br>Panier</div>
+<div class="nav-item">📦<br>Commandes</div>
+<div class="nav-item">↩<br>Refund</div>
+</div>
 
-<div class="bottom-nav hidden" id="navbar">
-<div class="active">🏠<br>Accueil</div>
-<div>🛒<br>Panier</div>
-<div>📦<br>Commandes</div>
-<div>↩<br>Refund</div>
 </div>
 
 <script>
 
 function openShop(){
-document.getElementById("home").classList.add("hidden");
-document.getElementById("shop").classList.remove("hidden");
-document.getElementById("navbar").classList.remove("hidden");
+document.getElementById("shop").classList.add("active");
 }
 
-function goHome(){
-document.getElementById("shop").classList.add("hidden");
-document.getElementById("home").classList.remove("hidden");
-document.getElementById("navbar").classList.add("hidden");
+function closeShop(){
+document.getElementById("shop").classList.remove("active");
 }
 
 </script>
