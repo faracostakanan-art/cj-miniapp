@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CJBOT</title>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-
 <style>
 body{
 margin:0;
@@ -38,7 +36,8 @@ border:1px solid rgba(255,255,255,0.08);
 }
 .balance{display:flex;justify-content:space-between;font-size:18px;}
 .amount{color:#3b82f6;font-weight:600;}
-.actions button,.modal-content button{
+.actions button,
+.modal-content button{
 width:100%;
 padding:14px;
 margin-bottom:12px;
@@ -66,19 +65,18 @@ border-radius:20px;
 width:85%;
 max-width:350px;
 text-align:center;
-max-height:80vh;
-overflow-y:auto;
 }
 .close-btn{background:#374151;}
 input{
 width:100%;
-padding:10px;
+padding:12px;
+margin-bottom:12px;
 border-radius:10px;
 border:none;
-margin-bottom:10px;
 }
 </style>
 </head>
+
 <body>
 
 <div class="app">
@@ -90,13 +88,18 @@ margin-bottom:10px;
 
 <div class="card balance">
 <span>Solde</span>
-<span class="amount" id="balanceAmount">0.00€</span>
+<span class="amount" id="balance">0.00€</span>
+</div>
+
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>Pour chaque 500€ rechargés, recevez 90€ bonus.</p>
 </div>
 
 <div class="actions">
 <button onclick="openShop()">🛒 Ouvrir la boutique</button>
-<button onclick="openHistory()">📜 Historique</button>
 <button onclick="recharge()">💳 Recharger</button>
+<button onclick="support()">📩 Support</button>
 </div>
 </div>
 
@@ -106,88 +109,192 @@ margin-bottom:10px;
 
 <script>
 
-/* NOUVELLES ADRESSES */
+/* ================= CONFIG ================= */
 
-const addresses = {
-BTC: "bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
-ETH: "0x5A652C891ee6F1cAF45c829A0e42f81856524939",
-USDT: "0x5A652C891ee6F1cAF45c829A0e42f81856524939"
+const ADMIN_CODE="CJ2026";
+
+const addresses={
+BTC:"bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
+ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
 };
 
-const products=[
-{ id:1,name:"LOG",price:45 },
-{ id:2,name:"CC",price:30 }
-];
+/* ================= INIT ================= */
+
+let balance=parseFloat(localStorage.getItem("balance"))||0;
+let totalDeposited=parseFloat(localStorage.getItem("totalDeposited"))||0;
+let bonusGiven=parseInt(localStorage.getItem("bonusGiven"))||0;
+let history=JSON.parse(localStorage.getItem("history"))||[];
+updateUI();
+
+/* ================= UI ================= */
 
 function updateUI(){
-let balance=parseFloat(localStorage.getItem("balance"))||0;
-document.getElementById("balanceAmount").innerText=balance.toFixed(2)+"€";
+document.getElementById("balance").innerText=balance.toFixed(2)+"€";
+localStorage.setItem("balance",balance);
 }
 
-/* DEPOT */
+/* ================= MODAL ================= */
 
 function recharge(){
-document.getElementById("modalContent").innerHTML=`
-<h3>Dépôt</h3>
-<p>BTC :</p>
-<p style="word-break:break-all">${addresses.BTC}</p>
-<p>ETH / USDT :</p>
-<p style="word-break:break-all">${addresses.ETH}</p>
-<button class="close-btn" onclick="closeModal()">Fermer</button>
-`;
+resetModal();
 document.getElementById("depositModal").style.display="flex";
-}
-
-/* SHOP */
-
-function openShop(){
-let content=`<h3>Boutique</h3>`;
-products.forEach(p=>{
-content+=`
-<div style="background:rgba(255,255,255,0.05);padding:12px;border-radius:12px;margin-bottom:10px;">
-<strong>${p.name}</strong><br>${p.price}€
-<button onclick="checkout(${p.price})">Payer avec MetaMask</button>
-</div>`;
-});
-content+=`<button class="close-btn" onclick="closeModal()">Fermer</button>`;
-document.getElementById("modalContent").innerHTML=content;
-document.getElementById("depositModal").style.display="flex";
-}
-
-/* METAMASK PAIEMENT REEL */
-
-async function checkout(total){
-
-if(typeof window.ethereum==="undefined"){
-alert("MetaMask non installé");
-return;
-}
-
-await ethereum.request({method:"eth_requestAccounts"});
-const provider=new ethers.providers.Web3Provider(window.ethereum);
-const signer=provider.getSigner();
-
-const tx={
-to:addresses.ETH,
-value:ethers.utils.parseEther((total/3000).toString())
-};
-
-await signer.sendTransaction(tx);
-alert("Transaction envoyée");
-}
-
-/* HISTORIQUE LOCAL */
-
-function openHistory(){
-let history=JSON.parse(localStorage.getItem("history"))||[];
-alert("Transactions locales: "+history.length);
 }
 
 function closeModal(){
 document.getElementById("depositModal").style.display="none";
 }
 
+function resetModal(){
+document.getElementById("modalContent").innerHTML=`
+<h3>Choisir un dépôt</h3>
+<button onclick="selectCrypto('BTC')">₿ Bitcoin</button>
+<button onclick="selectCrypto('ETH')">Ξ Ethereum</button>
+<button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
+<button class="close-btn" onclick="closeModal()">Fermer</button>
+`;
+}
+
+function selectCrypto(crypto){
+document.getElementById("modalContent").innerHTML=`
+<h3>Dépôt ${crypto}</h3>
+<p style="word-break:break-all;margin:15px 0;font-size:14px;">
+${addresses[crypto]}
+</p>
+<input type="number" id="depositAmount" placeholder="Montant en €">
+<button onclick="confirmDeposit()">Confirmer réception</button>
+<button onclick="copyAddress('${addresses[crypto]}')">Copier adresse</button>
+<button onclick="resetModal()">⬅ Retour</button>
+<button class="close-btn" onclick="closeModal()">Fermer</button>
+`;
+}
+
+function copyAddress(addr){
+navigator.clipboard.writeText(addr);
+alert("Adresse copiée");
+}
+
+/* ================= DEPOT ================= */
+
+function confirmDeposit(){
+
+const amount=parseFloat(document.getElementById("depositAmount").value);
+if(!amount||amount<=0){alert("Montant invalide");return;}
+
+const normalBonus=90;
+const promoBonus=120;
+const forcedPromo=localStorage.getItem("forcePromo")==="true";
+
+const promoEnd=new Date("2026-04-01").getTime();
+const now=Date.now();
+const activeBonus=(now<promoEnd||forcedPromo)?promoBonus:normalBonus;
+
+balance+=amount;
+totalDeposited+=amount;
+
+const milestone=Math.floor(totalDeposited/500);
+let bonus=0;
+
+if(milestone>bonusGiven){
+const newMilestones=milestone-bonusGiven;
+bonus=newMilestones*activeBonus;
+balance+=bonus;
+bonusGiven=milestone;
+}
+
+history.push({
+amount:amount,
+bonus:bonus,
+date:new Date().toLocaleString()
+});
+
+localStorage.setItem("history",JSON.stringify(history));
+localStorage.setItem("totalDeposited",totalDeposited);
+localStorage.setItem("bonusGiven",bonusGiven);
+
 updateUI();
+closeModal();
+alert("Solde crédité !");
+}
+
+/* ================= ADMIN PANEL ================= */
+
+let avatarClicks=0;
+
+document.querySelector(".avatar").addEventListener("click",()=>{
+avatarClicks++;
+if(avatarClicks>=5){
+avatarClicks=0;
+openAdminLogin();
+}
+setTimeout(()=>avatarClicks=0,2000);
+});
+
+function openAdminLogin(){
+const code=prompt("Code admin :");
+if(code===ADMIN_CODE){
+openAdminPanel();
+}
+}
+
+function openAdminPanel(){
+document.getElementById("modalContent").innerHTML=`
+<h3>Panneau Admin</h3>
+<button onclick="adminCredit()">➕ Créditer</button>
+<button onclick="adminDebit()">➖ Débiter</button>
+<button onclick="togglePromo()">🔥 Activer/Désactiver Promo</button>
+<button onclick="resetHistory()">🗑 Reset Historique</button>
+<button onclick="showStats()">📊 Statistiques</button>
+<button class="close-btn" onclick="closeModal()">Fermer</button>
+`;
+document.getElementById("depositModal").style.display="flex";
+}
+
+function adminCredit(){
+const amount=parseFloat(prompt("Montant à ajouter :"));
+if(!amount)return;
+balance+=amount;
+updateUI();
+alert("Crédit ajouté");
+}
+
+function adminDebit(){
+const amount=parseFloat(prompt("Montant à retirer :"));
+if(!amount)return;
+balance-=amount;
+if(balance<0)balance=0;
+updateUI();
+alert("Débit effectué");
+}
+
+function togglePromo(){
+let promo=localStorage.getItem("forcePromo")==="true";
+localStorage.setItem("forcePromo",!promo);
+alert("Promo "+(!promo?"Activée":"Désactivée"));
+}
+
+function resetHistory(){
+localStorage.clear();
+balance=0;
+totalDeposited=0;
+bonusGiven=0;
+history=[];
+updateUI();
+alert("Reset effectué");
+}
+
+function showStats(){
+alert(
+"Solde: "+balance+"€\n"+
+"Total Déposé: "+totalDeposited+"€\n"+
+"Transactions: "+history.length
+);
+}
+
+/* ================= AUTRES ================= */
+
+function openShop(){alert("Boutique bientôt disponible");}
+function support(){alert("Contact support");}
 
 </script>
 </body>
