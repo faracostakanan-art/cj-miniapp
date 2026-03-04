@@ -149,52 +149,7 @@
     </div>
   </div>
 
-  <script<script>
-  function recharge() {
-    document.getElementById("depositModal").style.display = "flex";
-  }
-
-  function closeModal() {
-    document.getElementById("depositModal").style.display = "none";
-  }
-
-  function selectCrypto(crypto) {
-
-    const addresses = {
-      BTC: "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
-      ETH: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
-      USDT: "0x5A652C891ee6F1cAF45c829A0e42f81856524939"
-    };
-
-    const modal = document.querySelector(".modal-content");
-
-    modal.innerHTML = `
-      <h3>Dépôt ${crypto}</h3>
-      <p style="word-break: break-all; margin:15px 0; font-size:14px;">
-        ${addresses[crypto]}
-      </p>
-      <button onclick="copyAddress('${addresses[crypto]}')">
-        Copier l'adresse
-      </button>
-      <button class="close-btn" onclick="closeModal()">
-        Fermer
-      </button>
-    `;
-  }
-
-  function copyAddress(address) {
-    navigator.clipboard.writeText(address);
-    alert("Adresse copiée");
-  }
-
-  function openShop() {
-    alert("Boutique bientôt disponible");
-  }
-
-  function support() {
-    alert("Contact support");
-  }
-</script>>
+  <script>
     function recharge() {
       document.getElementById("depositModal").style.display = "flex";
     }
