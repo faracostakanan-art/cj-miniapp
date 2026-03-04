@@ -3,73 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJBOT</title>
+<title>CJAYSHOP</title>
 
 <style>
 
-/* RESET */
+/* ===== RESET ===== */
+
 *{margin:0;padding:0;box-sizing:border-box;}
-
 body{
-font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:radial-gradient(circle at top,#1e293b,#0b1220 70%);
-color:white;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+background:#000;
+color:#fff;
 }
 
-/* ================= HOME ================= */
+/* ===== LAYOUT ===== */
 
-.app{padding:24px;}
-
-.header{text-align:center;margin-bottom:40px;}
-
-.avatar{
-width:80px;height:80px;
-background:linear-gradient(135deg,#3b82f6,#2563eb);
-border-radius:50%;
-margin:auto;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-font-weight:bold;
-}
-
-.card{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(15px);
-border-radius:16px;
-padding:20px;
-margin-bottom:20px;
-border:1px solid rgba(255,255,255,0.08);
-}
-
-.balance{
-display:flex;
-justify-content:space-between;
-font-size:18px;
-}
-
-.amount{
-color:#3b82f6;
-font-weight:600;
-}
-
-.actions button{
-width:100%;
-padding:14px;
-margin-bottom:12px;
-border-radius:14px;
-border:none;
-background:linear-gradient(90deg,#3b82f6,#2563eb);
-color:white;
-font-size:16px;
-font-weight:600;
-cursor:pointer;
-}
-
-/* ================= SHOP SCREEN ================= */
-
-.shop-screen{
+.screen{
 position:fixed;
 inset:0;
 background:#000;
@@ -77,11 +26,13 @@ display:none;
 flex-direction:column;
 }
 
-.shop-screen.active{
+.screen.active{
 display:flex;
 }
 
-.shop-header{
+/* ===== HEADER ===== */
+
+.header{
 height:60px;
 display:flex;
 align-items:center;
@@ -91,19 +42,23 @@ background:#111;
 font-weight:600;
 }
 
-.shop-header span{
+.header span{
 color:#3b82f6;
 cursor:pointer;
 }
 
-.shop-content{
+/* ===== CONTENT ===== */
+
+.content{
 flex:1;
 overflow-y:auto;
 padding:16px;
 padding-bottom:90px;
 }
 
-.balance-shop{
+/* ===== BALANCE CARD ===== */
+
+.balance{
 background:#111;
 border-radius:22px;
 padding:30px;
@@ -111,10 +66,12 @@ text-align:center;
 margin-bottom:20px;
 }
 
-.balance-shop h1{
+.balance h1{
 font-size:42px;
 margin:10px 0;
 }
+
+/* ===== TABS ===== */
 
 .tabs{
 display:flex;
@@ -136,6 +93,8 @@ background:#1a1a1a;
 opacity:1;
 }
 
+/* ===== FILTER ===== */
+
 .filter{
 background:#111;
 border-radius:14px;
@@ -143,6 +102,8 @@ padding:14px;
 text-align:center;
 margin-bottom:20px;
 }
+
+/* ===== PRODUCT CARD ===== */
 
 .product{
 background:#0f2a17;
@@ -193,6 +154,8 @@ font-weight:600;
 cursor:pointer;
 }
 
+/* ===== BOTTOM NAV ===== */
+
 .navbar{
 position:fixed;
 bottom:0;
@@ -217,51 +180,46 @@ opacity:1;
 color:#3b82f6;
 }
 
+/* ===== HOME ===== */
+
+.home{
+padding:20px;
+}
+
+.home button{
+width:100%;
+padding:16px;
+border:none;
+border-radius:18px;
+background:#3b82f6;
+color:white;
+font-weight:600;
+margin-top:20px;
+cursor:pointer;
+}
+
 </style>
 </head>
 <body>
 
-<!-- ================= HOME (IDENTIQUE) ================= -->
+<!-- HOME -->
+<div id="home" class="home">
+<h1>CJAYSHOP</h1>
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
+</div>
 
-<div class="app">
+<!-- SHOP SCREEN -->
+<div id="shopScreen" class="screen">
 
 <div class="header">
-<div class="avatar">CJ</div>
-<h1>CJBOT</h1>
-<p>Boutique Premium Crypto</p>
-</div>
-
-<div class="card balance">
-<span>Solde</span>
-<span class="amount">0.00€</span>
-</div>
-
-<div class="card">
-<h3>Programme fidélité</h3>
-<p>Pour chaque 500€ rechargés, recevez 90€ bonus.</p>
-</div>
-
-<div class="actions">
-<button onclick="openShop()">🛒 Ouvrir la boutique</button>
-<button>💳 Recharger</button>
-<button>📩 Support</button>
-</div>
-
-</div>
-
-<!-- ================= SHOP ================= -->
-
-<div id="shop" class="shop-screen">
-
-<div class="shop-header">
 <span onclick="closeShop()">Fermer</span>
 <div>CJAYSHOP</div>
 <div>•••</div>
 </div>
 
-<div class="shop-content">
+<div class="content">
 
-<div class="balance-shop">
+<div class="balance">
 <div>SOLDE DISPONIBLE</div>
 <h1>€0.00</h1>
 <div style="opacity:.5;font-size:14px;">Appuyer pour actualiser</div>
@@ -311,11 +269,11 @@ color:#3b82f6;
 <script>
 
 function openShop(){
-document.getElementById("shop").classList.add("active");
+document.getElementById("shopScreen").classList.add("active");
 }
 
 function closeShop(){
-document.getElementById("shop").classList.remove("active");
+document.getElementById("shopScreen").classList.remove("active");
 }
 
 </script>
