@@ -1,208 +1,253 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CJBOT</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJBOT</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #0b1220 70%);
-      color: white;
-    }
-
-    .app {
-      padding: 24px;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .avatar {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      border-radius: 50%;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(15px);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .balance {
-      display: flex;
-      justify-content: space-between;
-      font-size: 18px;
-    }
-
-    .amount {
-      color: #3b82f6;
-      font-weight: 600;
-    }
-
-    .actions button {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 12px;
-      border-radius: 14px;
-      border: none;
-      background: linear-gradient(90deg, #3b82f6, #2563eb);
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: #111827;
-      padding: 25px;
-      border-radius: 20px;
-      width: 85%;
-      max-width: 350px;
-      text-align: center;
-    }
-
-    .modal-content button {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 12px;
-      border-radius: 14px;
-      border: none;
-      background: linear-gradient(90deg, #3b82f6, #2563eb);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .close-btn {
-      background: #374151;
-    }
-  </style>
+<style>
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:radial-gradient(circle at top,#1e293b,#0b1220 70%);
+  color:white;
+}
+.app{padding:24px;}
+.header{text-align:center;margin-bottom:40px;}
+.avatar{
+  width:80px;height:80px;
+  background:linear-gradient(135deg,#3b82f6,#2563eb);
+  border-radius:50%;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  font-weight:bold;
+}
+.card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(15px);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.balance{
+  display:flex;
+  justify-content:space-between;
+  font-size:18px;
+}
+.amount{color:#3b82f6;font-weight:600;}
+.actions button{
+  width:100%;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  color:white;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(10px);
+  justify-content:center;
+  align-items:center;
+}
+.modal-content{
+  background:#111827;
+  padding:25px;
+  border-radius:20px;
+  width:85%;
+  max-width:350px;
+  text-align:center;
+}
+.modal-content button{
+  width:100%;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+.close-btn{background:#374151;}
+.small{font-size:13px;opacity:0.7;margin-top:8px;}
+.history-item{font-size:13px;margin-top:6px;}
+</style>
 </head>
 
 <body>
 
-  <div class="app">
-    <div class="header">
-      <div class="avatar">CJ</div>
-      <h1>CJBOT</h1>
-      <p>Boutique Premium Crypto</p>
-    </div>
+<div class="app">
 
-    <div class="card balance">
-      <span>Solde</span>
-      <span class="amount">0.00€</span>
-    </div>
+<div class="header">
+<div class="avatar">CJ</div>
+<h1>CJBOT</h1>
+<p>Boutique Premium Crypto</p>
+</div>
 
-    <div class="card">
-      <h3>Programme fidélité</h3>
-      <p>Pour chaque 500€ rechargés, recevez 90€ bonus.</p>
-    </div>
+<div class="card balance">
+<span>Solde</span>
+<span class="amount" id="balance">0.00€</span>
+</div>
 
-    <div class="actions">
-      <button onclick="openShop()">🛒 Ouvrir la boutique</button>
-      <button onclick="recharge()">💳 Recharger</button>
-      <button onclick="support()">📩 Support</button>
-    </div>
-  </div>
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>500€ rechargés = 90€ bonus</p>
+<p class="small" id="progress"></p>
+</div>
 
-  <!-- MODAL -->
-  <div id="depositModal" class="modal">
-    <div class="modal-content" id="modalContent">
-      <h3>Choisir un dépôt</h3>
-      <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
-      <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
-      <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
-      <button class="close-btn" onclick="closeModal()">Fermer</button>
-    </div>
-  </div>
+<div class="card">
+<h3>Historique</h3>
+<div id="history"></div>
+</div>
 
-  <script>
-    const addresses = {
-      BTC: "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
-      ETH: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
-      USDT: "0x5A652C891ee6F1cAF45c829A0e42f81856524939"
-    };
+<div class="actions">
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
+<button onclick="recharge()">💳 Recharger</button>
+<button onclick="support()">📩 Support</button>
+</div>
 
-    function recharge() {
-      document.getElementById("depositModal").style.display = "flex";
-    }
+</div>
 
-    function closeModal() {
-      document.getElementById("depositModal").style.display = "none";
-    }
+<!-- MODAL -->
+<div id="depositModal" class="modal">
+<div class="modal-content" id="modalContent">
+<h3>Choisir un dépôt</h3>
+<button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
+<button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
+<button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
+<button class="close-btn" onclick="closeModal()">Fermer</button>
+</div>
+</div>
 
-    function selectCrypto(crypto) {
-      const modal = document.getElementById("modalContent");
+<script>
 
-      modal.innerHTML = `
-        <h3>Dépôt ${crypto}</h3>
-        <p style="word-break: break-all; margin:15px 0; font-size:14px;">
-          ${addresses[crypto]}
-        </p>
-        <button onclick="copyAddress('${addresses[crypto]}')">
-          Copier l'adresse
-        </button>
-        <button onclick="resetModal()">
-          ⬅ Retour
-        </button>
-        <button class="close-btn" onclick="closeModal()">
-          Fermer
-        </button>
-      `;
-    }
+const addresses = {
+BTC:"bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
+ETH:"0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
+USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
+};
 
-    function resetModal() {
-      const modal = document.getElementById("modalContent");
+function recharge(){
+document.getElementById("depositModal").style.display="flex";
+}
 
-      modal.innerHTML = `
-        <h3>Choisir un dépôt</h3>
-        <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
-        <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
-        <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
-        <button class="close-btn" onclick="closeModal()">Fermer</button>
-      `;
-    }
+function closeModal(){
+document.getElementById("depositModal").style.display="none";
+resetModal();
+}
 
-    function copyAddress(address) {
-      navigator.clipboard.writeText(address);
-      alert("Adresse copiée");
-    }
+function selectCrypto(crypto){
+const modal=document.getElementById("modalContent");
 
-    function openShop() {
-      alert("Boutique bientôt disponible");
-    }
+modal.innerHTML=`
+<h3>Dépôt ${crypto}</h3>
+<p style="word-break:break-all;margin:15px 0;font-size:14px;">
+${addresses[crypto]}
+</p>
 
-    function support() {
-      alert("Contact support");
-    }
-  </script>
+<input type="number" id="depositAmount" placeholder="Montant reçu €" 
+style="width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px;">
+
+<button onclick="confirmDeposit()">Confirmer réception</button>
+
+<button onclick="resetModal()">⬅ Retour</button>
+<button class="close-btn" onclick="closeModal()">Fermer</button>
+`;
+}
+
+function resetModal(){
+document.getElementById("modalContent").innerHTML=`
+<h3>Choisir un dépôt</h3>
+<button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
+<button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
+<button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
+<button class="close-btn" onclick="closeModal()">Fermer</button>
+`;
+}
+
+function confirmDeposit(){
+
+const amount=parseFloat(document.getElementById("depositAmount").value);
+if(!amount || amount<=0){alert("Montant invalide");return;}
+
+let balance=parseFloat(localStorage.getItem("balance"))||0;
+let totalDeposited=parseFloat(localStorage.getItem("totalDeposited"))||0;
+let bonusGiven=parseInt(localStorage.getItem("bonusGiven"))||0;
+
+const normalBonus=90;
+const promoBonus=120;
+const promoEndDate=new Date("2026-04-01").getTime();
+const now=Date.now();
+const activeBonus=now<promoEndDate?promoBonus:normalBonus;
+
+balance+=amount;
+totalDeposited+=amount;
+
+const milestone=Math.floor(totalDeposited/500);
+let bonus=0;
+
+if(milestone>bonusGiven){
+const newMilestones=milestone-bonusGiven;
+bonus=newMilestones*activeBonus;
+balance+=bonus;
+bonusGiven=milestone;
+}
+
+localStorage.setItem("balance",balance);
+localStorage.setItem("totalDeposited",totalDeposited);
+localStorage.setItem("bonusGiven",bonusGiven);
+
+let history=JSON.parse(localStorage.getItem("history"))||[];
+history.push({
+amount:amount,
+bonus:bonus,
+date:new Date().toLocaleString()
+});
+localStorage.setItem("history",JSON.stringify(history));
+
+updateUI();
+closeModal();
+alert("Solde crédité !");
+}
+
+function updateUI(){
+const balance=parseFloat(localStorage.getItem("balance"))||0;
+document.getElementById("balance").innerText=balance.toFixed(2)+"€";
+
+const total=parseFloat(localStorage.getItem("totalDeposited"))||0;
+const next=500-(total%500);
+document.getElementById("progress").innerText=
+"Encore "+next.toFixed(2)+"€ pour le prochain bonus";
+
+const history=JSON.parse(localStorage.getItem("history"))||[];
+const container=document.getElementById("history");
+container.innerHTML="";
+history.slice().reverse().forEach(tx=>{
+container.innerHTML+=
+`<div class="history-item">
++${tx.amount}€ | Bonus +${tx.bonus}€ | ${tx.date}
+</div>`;
+});
+}
+
+function openShop(){alert("Boutique bientôt disponible");}
+function support(){alert("Contact support");}
+
+updateUI();
+
+</script>
 
 </body>
 </html>
