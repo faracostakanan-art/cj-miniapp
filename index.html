@@ -1,26 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>CJ Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta charset="UTF-8">
+<title>CJ SHOP</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body style="background:#0f0f0f;color:white;text-align:center;padding-top:50px;font-family:sans-serif;">
 
-<h1>CJ Mini App</h1>
-<p id="user">Chargement...</p>
+<body style="background:#0f0f0f;color:white;text-align:center;font-family:sans-serif;padding-top:40px;">
+
+<h2>CJ SHOP</h2>
+
+<div id="content"></div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-  if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    const user = tg.initDataUnsafe.user;
-    document.getElementById("user").innerHTML =
-      "Bienvenue " + user.first_name + "<br>ID: " + user.id;
-  } else {
-    document.getElementById("user").innerHTML = "Ouvert hors Telegram";
-  }
+const user = tg.initDataUnsafe?.user;
+
+const BTC_ADDRESS = "TON_ADRESSE_BTC_ICI";
+const ETH_ADDRESS = "TON_ADRESSE_ETH_ICI";
+const USDT_TRC20_ADDRESS = "TON_ADRESSE_USDT_TRC20_ICI";
+
+const orderId = "CJ" + Math.floor(Math.random()*1000000);
+const priceUSD = 50;
+
+document.getElementById("content").innerHTML = `
+<p>Produit Premium</p>
+<p>Prix: ${priceUSD} USD</p>
+
+<h3>Paiement</h3>
+
+<p><b>BTC</b><br>${bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz}</p>
+<p><b>ETH</b><br>${0x1F3E0A4E2ec341C718d706ACdabad874484033ae}</p>
+<p><b>USDT TRC20</b><br>${0x1F3E0A4E2ec341C718d706ACdabad874484033ae}</p>
+
+<p><b>Référence:</b> ${orderId}</p>
+
+<button onclick="paid()">J'ai payé</button>
+`;
+
+function paid() {
+  tg.sendData(JSON.stringify({
+    order: orderId,
+    user: user?.id,
+    status: "pending"
+  }));
+  alert("Demande envoyée au support");
+}
 </script>
 
 </body>
