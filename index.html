@@ -66,12 +66,44 @@
       color: white;
       font-size: 16px;
       font-weight: 600;
-      transition: 0.3s;
     }
 
-    .actions button:hover {
-      transform: scale(1.02);
+    /* MODAL */
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      justify-content: center;
+      align-items: center;
     }
+
+    .modal-content {
+      background: #111827;
+      padding: 25px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 350px;
+      text-align: center;
+    }
+
+    .modal-content button {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      color: white;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: #374151;
+    }
+
   </style>
 
 </head>
@@ -104,7 +136,40 @@
 
   </div>
 
-  <script src="script.js"></script>
+  <!-- MODAL -->
+  <div id="depositModal" class="modal">
+    <div class="modal-content">
+      <h3>Choisir un dépôt</h3>
+
+      <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
+      <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
+      <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
+
+      <button class="close-btn" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+
+  <script>
+    function recharge() {
+      document.getElementById("depositModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("depositModal").style.display = "none";
+    }
+
+    function selectCrypto(crypto) {
+      alert("Adresse de dépôt pour " + crypto);
+    }
+
+    function openShop() {
+      alert("Boutique bientôt disponible");
+    }
+
+    function support() {
+      alert("Contact support");
+    }
+  </script>
 
 </body>
 </html>
