@@ -1,35 +1,101 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CJBOT</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #0b1220 70%);
+      color: white;
+    }
+
+    .app {
+      padding: 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-radius: 50%;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .balance {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+    }
+
+    .amount {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+
+    .actions button {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .actions button:hover {
+      transform: scale(1.02);
+    }
+  </style>
+
 </head>
+
 <body>
 
   <div class="app">
 
-    <!-- HEADER -->
     <div class="header">
       <div class="avatar">CJ</div>
       <h1>CJBOT</h1>
       <p>Boutique Premium Crypto</p>
     </div>
 
-    <!-- SOLDE -->
     <div class="card balance">
       <span>Solde</span>
       <span class="amount">0.00€</span>
     </div>
 
-    <!-- PROGRAMME -->
     <div class="card">
       <h3>Programme fidélité</h3>
-      <p>Pour chaque 1000€ rechargés, recevez 50€ bonus.</p>
+      <p>Pour chaque 500€ rechargés, recevez 90€ bonus.</p>
     </div>
 
-    <!-- ACTIONS -->
     <div class="actions">
       <button onclick="openShop()">🛒 Ouvrir la boutique</button>
       <button onclick="recharge()">💳 Recharger</button>
@@ -38,79 +104,7 @@
 
   </div>
 
-<script src="script.js"></script>
-</bodybody {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  background: radial-gradient(circle at top, #1e293b, #0b1220 70%);
-  color: white;
-}
+  <script src="script.js"></script>
 
-.app {
-  padding: 24px;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.avatar {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  border-radius: 50%;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.header h1 {
-  margin: 15px 0 5px 0;
-  color: #3b82f6;
-}
-
-.header p {
-  color: #94a3b8;
-}
-
-.card {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(15px);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.balance {
-  display: flex;
-  justify-content: space-between;
-  font-size: 18px;
-}
-
-.amount {
-  color: #3b82f6;
-  font-weight: 600;
-}
-
-.actions button {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 12px;
-  border-radius: 14px;
-  border: none;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  transition: 0.3s;
-}
-
-.actions button:hover {
-  transform: scale(1.02);
-}>
+</body>
 </html>
