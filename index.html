@@ -3,277 +3,205 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJAYSHOP</title>
+<title>CJBOT</title>
 
 <style>
-
-/* ===== RESET ===== */
-
-*{margin:0;padding:0;box-sizing:border-box;}
 body{
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
-background:#000;
-color:#fff;
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+background:radial-gradient(circle at top,#1e293b,#0b1220 70%);
+color:white;
 }
 
-/* ===== LAYOUT ===== */
+.app{padding:24px;}
 
-.screen{
-position:fixed;
-inset:0;
-background:#000;
-display:none;
-flex-direction:column;
-}
+.header{text-align:center;margin-bottom:40px;}
 
-.screen.active{
-display:flex;
-}
-
-/* ===== HEADER ===== */
-
-.header{
-height:60px;
+.avatar{
+width:80px;height:80px;
+background:linear-gradient(135deg,#3b82f6,#2563eb);
+border-radius:50%;
+margin:auto;
 display:flex;
 align-items:center;
-justify-content:space-between;
-padding:0 16px;
-background:#111;
-font-weight:600;
+justify-content:center;
+font-size:28px;
+font-weight:bold;
 }
 
-.header span{
-color:#3b82f6;
+.card{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(15px);
+border-radius:16px;
+padding:20px;
+margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.balance{display:flex;justify-content:space-between;font-size:18px;}
+.amount{color:#3b82f6;font-weight:600;}
+
+.actions button,
+.modal-content button{
+width:100%;
+padding:14px;
+margin-bottom:12px;
+border-radius:14px;
+border:none;
+background:linear-gradient(90deg,#3b82f6,#2563eb);
+color:white;
+font-size:16px;
+font-weight:600;
 cursor:pointer;
 }
 
-/* ===== CONTENT ===== */
+.close-btn{background:#374151;}
+.back-btn{background:#1f2937;}
 
-.content{
-flex:1;
-overflow-y:auto;
-padding:16px;
-padding-bottom:90px;
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+justify-content:center;
+align-items:center;
 }
 
-/* ===== BALANCE CARD ===== */
-
-.balance{
-background:#111;
-border-radius:22px;
-padding:30px;
-text-align:center;
-margin-bottom:20px;
-}
-
-.balance h1{
-font-size:42px;
-margin:10px 0;
-}
-
-/* ===== TABS ===== */
-
-.tabs{
-display:flex;
-background:#111;
-border-radius:14px;
-overflow:hidden;
-margin-bottom:20px;
-}
-
-.tab{
-flex:1;
-text-align:center;
-padding:12px;
-opacity:.5;
-}
-
-.tab.active{
-background:#1a1a1a;
-opacity:1;
-}
-
-/* ===== FILTER ===== */
-
-.filter{
-background:#111;
-border-radius:14px;
-padding:14px;
-text-align:center;
-margin-bottom:20px;
-}
-
-/* ===== PRODUCT CARD ===== */
-
-.product{
-background:#0f2a17;
-border:1.5px solid #22c55e;
+.modal-content{
+background:#111827;
+padding:25px;
 border-radius:20px;
-padding:18px;
-margin-bottom:20px;
+width:90%;
+max-width:380px;
 }
-
-.badges{
-display:flex;
-gap:8px;
-margin-bottom:14px;
-}
-
-.badge{
-padding:5px 10px;
-border-radius:10px;
-font-size:12px;
-}
-
-.purple{background:#5b3ba8;}
-.gray{background:#333;}
-.orange{background:#8a5a00;}
 
 .grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:10px;
-font-size:14px;
-margin-bottom:15px;
+margin-top:15px;
 }
 
-.price{
-font-size:22px;
-font-weight:700;
-margin-bottom:12px;
-}
-
-.btn-green{
-background:#22c55e;
-border:none;
-padding:14px;
-width:100%;
-border-radius:16px;
-color:#fff;
-font-weight:600;
-cursor:pointer;
-}
-
-/* ===== BOTTOM NAV ===== */
-
-.navbar{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-height:70px;
-background:#111;
-display:flex;
-justify-content:space-around;
-align-items:center;
-border-top:1px solid #222;
-}
-
-.nav-item{
-text-align:center;
-font-size:12px;
-opacity:.6;
-}
-
-.nav-item.active{
-opacity:1;
-color:#3b82f6;
-}
-
-/* ===== HOME ===== */
-
-.home{
-padding:20px;
-}
-
-.home button{
-width:100%;
-padding:16px;
-border:none;
-border-radius:18px;
-background:#3b82f6;
-color:white;
-font-weight:600;
-margin-top:20px;
-cursor:pointer;
-}
-
+.full{grid-column:1/3;}
+.info{margin:6px 0;font-size:14px;}
 </style>
 </head>
+
 <body>
 
-<!-- HOME -->
-<div id="home" class="home">
-<h1>CJAYSHOP</h1>
-<button onclick="openShop()">🛒 Ouvrir la boutique</button>
-</div>
-
-<!-- SHOP SCREEN -->
-<div id="shopScreen" class="screen">
-
+<div class="app">
 <div class="header">
-<span onclick="closeShop()">Fermer</span>
-<div>CJAYSHOP</div>
-<div>•••</div>
+<div class="avatar">CJ</div>
+<h1>CJBOT</h1>
+<p>Boutique Premium Crypto</p>
 </div>
 
-<div class="content">
-
-<div class="balance">
-<div>SOLDE DISPONIBLE</div>
-<h1>€0.00</h1>
-<div style="opacity:.5;font-size:14px;">Appuyer pour actualiser</div>
+<div class="card balance">
+<span>Solde</span>
+<span class="amount">0.00€</span>
 </div>
 
-<div class="tabs">
-<div class="tab active">Liste</div>
-<div class="tab">Box</div>
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>500€ rechargés = 90€ bonus</p>
 </div>
 
-<div class="filter">Filtrer</div>
-
-<div style="opacity:.5;margin-bottom:10px;">8 résultats</div>
-
-<div class="product">
-
-<div class="badges">
-<div class="badge purple">PETER</div>
-<div class="badge gray">ANDROID</div>
-<div class="badge orange">5H</div>
+<div class="actions">
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
+<button onclick="openDeposit()">💳 Recharger</button>
+<button onclick="support()">📩 Support</button>
+</div>
 </div>
 
-<div class="grid">
-<div><strong>AGE</strong><br>28 ans</div>
-<div><strong>BANQUE</strong><br>Inconnue</div>
-<div><strong>PRÉNOM</strong><br>Michael</div>
-<div><strong>CODE POSTAL</strong><br>Inconnu</div>
-</div>
-
-<div class="price">€70.00</div>
-
-<button class="btn-green">RETIRER</button>
-
-</div>
-
-</div>
-
-<div class="navbar">
-<div class="nav-item active">🏠<br>Accueil</div>
-<div class="nav-item">🛒<br>Panier</div>
-<div class="nav-item">📦<br>Commandes</div>
-<div class="nav-item">↩<br>Refund</div>
-</div>
-
+<!-- MODAL -->
+<div id="modal" class="modal">
+<div class="modal-content" id="modalContent"></div>
 </div>
 
 <script>
 
-function openShop(){
-document.getElementById("shopScreen").classList.add("active");
+const addresses = {
+BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
+ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
+};
+
+function openDeposit(){
+document.getElementById("modal").style.display="flex";
+
+document.getElementById("modalContent").innerHTML=`
+<h3>💰 DÉPÔT CRYPTO</h3>
+<div class="info">Choisissez votre crypto:</div>
+<div class="info">✅ Paiement instantané</div>
+<div class="info">✅ Confirmation automatique</div>
+<div class="info">✅ Minimum 10€</div>
+
+<div class="grid">
+<button onclick="selectCrypto('USDT')">USDT (ERC20)</button>
+<button onclick="selectCrypto('USDC')">USDC (ERC20)</button>
+<button onclick="selectCrypto('BTC')">₿ Bitcoin</button>
+<button onclick="selectCrypto('ETH')">Ξ Ethereum</button>
+<button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
+</div>
+`;
 }
 
-function closeShop(){
-document.getElementById("shopScreen").classList.remove("active");
+function selectCrypto(crypto){
+document.getElementById("modalContent").innerHTML=`
+<h3>💰 DÉPÔT EN ${crypto}</h3>
+<div class="info">Sélectionnez le montant:</div>
+<div class="info">💡 Minimum: 10€ | Maximum: 1000€</div>
+<div class="info">🔄 Réception directe</div>
+<div class="info">⚠️ NE CLIQUEZ QU'UNE SEULE FOIS !</div>
+
+<div class="grid">
+<button onclick="showAddress('${crypto}')">10€</button>
+<button onclick="showAddress('${crypto}')">25€</button>
+<button onclick="showAddress('${crypto}')">50€</button>
+<button onclick="showAddress('${crypto}')">100€</button>
+<button onclick="showAddress('${crypto}')">250€</button>
+<button onclick="showAddress('${crypto}')">500€</button>
+<button class="full" onclick="showAddress('${crypto}')">💰 Montant personnalisé</button>
+<button class="full back-btn" onclick="openDeposit()">⬅ Retour</button>
+</div>
+`;
+}
+
+function showAddress(crypto){
+document.getElementById("modalContent").innerHTML=`
+<h3>Dépôt ${crypto}</h3>
+<p style="word-break:break-all;font-size:13px;margin:15px 0;">
+${addresses[crypto]}
+</p>
+<button onclick="copyAddress('${addresses[crypto]}')">
+Copier l'adresse
+</button>
+<button class="back-btn" onclick="selectCrypto('${crypto}')">
+⬅ Retour
+</button>
+<button class="close-btn" onclick="closeModal()">
+Fermer
+</button>
+`;
+}
+
+function copyAddress(addr){
+navigator.clipboard.writeText(addr);
+alert("Adresse copiée");
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+function openShop(){
+alert("Boutique bientôt disponible");
+}
+
+function support(){
+alert("Support bientôt disponible");
 }
 
 </script>
