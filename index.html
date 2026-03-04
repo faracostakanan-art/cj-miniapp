@@ -66,9 +66,8 @@
       color: white;
       font-size: 16px;
       font-weight: 600;
+      cursor: pointer;
     }
-
-    /* MODAL */
 
     .modal {
       display: none;
@@ -98,20 +97,18 @@
       background: linear-gradient(90deg, #3b82f6, #2563eb);
       color: white;
       font-weight: 600;
+      cursor: pointer;
     }
 
     .close-btn {
       background: #374151;
     }
-
   </style>
-
 </head>
 
 <body>
 
   <div class="app">
-
     <div class="header">
       <div class="avatar">CJ</div>
       <h1>CJBOT</h1>
@@ -133,23 +130,26 @@
       <button onclick="recharge()">💳 Recharger</button>
       <button onclick="support()">📩 Support</button>
     </div>
-
   </div>
 
   <!-- MODAL -->
   <div id="depositModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" id="modalContent">
       <h3>Choisir un dépôt</h3>
-
       <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
       <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
       <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
-
       <button class="close-btn" onclick="closeModal()">Fermer</button>
     </div>
   </div>
 
   <script>
+    const addresses = {
+      BTC: "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
+      ETH: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
+      USDT: "0x5A652C891ee6F1cAF45c829A0e42f81856524939"
+    };
+
     function recharge() {
       document.getElementById("depositModal").style.display = "flex";
     }
@@ -159,7 +159,40 @@
     }
 
     function selectCrypto(crypto) {
-      alert("Adresse de dépôt pour " + crypto);
+      const modal = document.getElementById("modalContent");
+
+      modal.innerHTML = `
+        <h3>Dépôt ${crypto}</h3>
+        <p style="word-break: break-all; margin:15px 0; font-size:14px;">
+          ${addresses[crypto]}
+        </p>
+        <button onclick="copyAddress('${addresses[crypto]}')">
+          Copier l'adresse
+        </button>
+        <button onclick="resetModal()">
+          ⬅ Retour
+        </button>
+        <button class="close-btn" onclick="closeModal()">
+          Fermer
+        </button>
+      `;
+    }
+
+    function resetModal() {
+      const modal = document.getElementById("modalContent");
+
+      modal.innerHTML = `
+        <h3>Choisir un dépôt</h3>
+        <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
+        <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
+        <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
+        <button class="close-btn" onclick="closeModal()">Fermer</button>
+      `;
+    }
+
+    function copyAddress(address) {
+      navigator.clipboard.writeText(address);
+      alert("Adresse copiée");
     }
 
     function openShop() {
@@ -169,52 +202,7 @@
     function support() {
       alert("Contact support");
     }
-  </<script>
-  function recharge() {
-    document.getElementById("depositModal").style.display = "flex";
-  }
-
-  function closeModal() {
-    document.getElementById("depositModal").style.display = "none";
-  }
-
-  function selectCrypto(crypto) {
-
-    const addresses = {
-      BTC: "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
-      ETH: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
-      USDT: "0x5A652C891ee6F1cAF45c829A0e42f81856524939"
-    };
-
-    const modal = document.querySelector(".modal-content");
-
-    modal.innerHTML = `
-      <h3>Dépôt ${crypto}</h3>
-      <p style="word-break: break-all; margin:15px 0; font-size:14px;">
-        ${addresses[crypto]}
-      </p>
-      <button onclick="copyAddress('${addresses[crypto]}')">
-        Copier l'adresse
-      </button>
-      <button class="close-btn" onclick="closeModal()">
-        Fermer
-      </button>
-    `;
-  }
-
-  function copyAddress(address) {
-    navigator.clipboard.writeText(address);
-    alert("Adresse copiée");
-  }
-
-  function openShop() {
-    alert("Boutique bientôt disponible");
-  }
-
-  function support() {
-    alert("Contact support");
-  }
-</script>>
+  </script>
 
 </body>
 </html>
