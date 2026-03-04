@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CJBOT</title>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
 body{
 margin:0;
@@ -14,7 +16,6 @@ color:white;
 }
 
 .app{padding:24px;}
-
 .header{text-align:center;margin-bottom:40px;}
 
 .avatar{
@@ -114,12 +115,14 @@ margin-top:15px;
 </div>
 </div>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
 <div class="modal-content" id="modalContent"></div>
 </div>
 
 <script>
+
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if(tg){ tg.expand(); }
 
 const addresses = {
 BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
@@ -153,25 +156,23 @@ document.getElementById("modalContent").innerHTML=`
 <h3>💰 DÉPÔT EN ${crypto}</h3>
 <div class="info">Sélectionnez le montant:</div>
 <div class="info">💡 Minimum: 10€ | Maximum: 1000€</div>
-<div class="info">🔄 Réception directe</div>
-<div class="info">⚠️ NE CLIQUEZ QU'UNE SEULE FOIS !</div>
 
 <div class="grid">
-<button onclick="showAddress('${crypto}')">10€</button>
-<button onclick="showAddress('${crypto}')">25€</button>
-<button onclick="showAddress('${crypto}')">50€</button>
-<button onclick="showAddress('${crypto}')">100€</button>
-<button onclick="showAddress('${crypto}')">250€</button>
-<button onclick="showAddress('${crypto}')">500€</button>
-<button class="full" onclick="showAddress('${crypto}')">💰 Montant personnalisé</button>
+<button onclick="showAddress('${crypto}',10)">10€</button>
+<button onclick="showAddress('${crypto}',25)">25€</button>
+<button onclick="showAddress('${crypto}',50)">50€</button>
+<button onclick="showAddress('${crypto}',100)">100€</button>
+<button onclick="showAddress('${crypto}',250)">250€</button>
+<button onclick="showAddress('${crypto}',500)">500€</button>
 <button class="full back-btn" onclick="openDeposit()">⬅ Retour</button>
 </div>
 `;
 }
 
-function showAddress(crypto){
+function showAddress(crypto, amount){
 document.getElementById("modalContent").innerHTML=`
 <h3>Dépôt ${crypto}</h3>
+<div class="info">Montant sélectionné: <strong>${amount}€</strong></div>
 <p style="word-break:break-all;font-size:13px;margin:15px 0;">
 ${addresses[crypto]}
 </p>
@@ -189,7 +190,12 @@ Fermer
 
 function copyAddress(addr){
 navigator.clipboard.writeText(addr);
+
+if(tg){
+tg.showAlert("Adresse copiée");
+}else{
 alert("Adresse copiée");
+}
 }
 
 function closeModal(){
@@ -197,11 +203,13 @@ document.getElementById("modal").style.display="none";
 }
 
 function openShop(){
-alert("Boutique bientôt disponible");
+if(tg){ tg.showAlert("Boutique bientôt disponible"); }
+else{ alert("Boutique bientôt disponible"); }
 }
 
 function support(){
-alert("Support bientôt disponible");
+if(tg){ tg.showAlert("Support bientôt disponible"); }
+else{ alert("Support bientôt disponible"); }
 }
 
 </script>
