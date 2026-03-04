@@ -1,208 +1,210 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CJBOT</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJBOT</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #0b1220 70%);
-      color: white;
-    }
+<style>
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+background:radial-gradient(circle at top,#1e293b,#0b1220 70%);
+color:white;
+}
 
-    .app {
-      padding: 24px;
-    }
+.app{padding:24px;}
 
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
+.header{text-align:center;margin-bottom:40px;}
 
-    .avatar {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      border-radius: 50%;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: bold;
-    }
+.avatar{
+width:80px;height:80px;
+background:linear-gradient(135deg,#3b82f6,#2563eb);
+border-radius:50%;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:bold;
+}
 
-    .card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(15px);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
+.card{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(15px);
+border-radius:16px;
+padding:20px;
+margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.08);
+}
 
-    .balance {
-      display: flex;
-      justify-content: space-between;
-      font-size: 18px;
-    }
+.balance{display:flex;justify-content:space-between;font-size:18px;}
+.amount{color:#3b82f6;font-weight:600;}
 
-    .amount {
-      color: #3b82f6;
-      font-weight: 600;
-    }
+.actions button,
+.modal-content button{
+width:100%;
+padding:14px;
+margin-bottom:12px;
+border-radius:14px;
+border:none;
+background:linear-gradient(90deg,#3b82f6,#2563eb);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+}
 
-    .actions button {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 12px;
-      border-radius: 14px;
-      border: none;
-      background: linear-gradient(90deg, #3b82f6, #2563eb);
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+.close-btn{background:#374151;}
+.back-btn{background:#1f2937;}
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px);
-      justify-content: center;
-      align-items: center;
-    }
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+justify-content:center;
+align-items:center;
+}
 
-    .modal-content {
-      background: #111827;
-      padding: 25px;
-      border-radius: 20px;
-      width: 85%;
-      max-width: 350px;
-      text-align: center;
-    }
+.modal-content{
+background:#111827;
+padding:25px;
+border-radius:20px;
+width:90%;
+max-width:380px;
+}
 
-    .modal-content button {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 12px;
-      border-radius: 14px;
-      border: none;
-      background: linear-gradient(90deg, #3b82f6, #2563eb);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-top:15px;
+}
 
-    .close-btn {
-      background: #374151;
-    }
-  </style>
+.full{grid-column:1/3;}
+.info{margin:6px 0;font-size:14px;}
+</style>
 </head>
 
 <body>
 
-  <div class="app">
-    <div class="header">
-      <div class="avatar">CJ</div>
-      <h1>CJBOT</h1>
-      <p>Boutique Premium Crypto</p>
-    </div>
+<div class="app">
+<div class="header">
+<div class="avatar">CJ</div>
+<h1>CJBOT</h1>
+<p>Boutique Premium Crypto</p>
+</div>
 
-    <div class="card balance">
-      <span>Solde</span>
-      <span class="amount">0.00€</span>
-    </div>
+<div class="card balance">
+<span>Solde</span>
+<span class="amount">0.00€</span>
+</div>
 
-    <div class="card">
-      <h3>Programme fidélité</h3>
-      <p>Pour chaque 500€ rechargés, recevez 90€ bonus.</p>
-    </div>
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>500€ rechargés = 90€ bonus</p>
+</div>
 
-    <div class="actions">
-      <button onclick="openShop()">🛒 Ouvrir la boutique</button>
-      <button onclick="recharge()">💳 Recharger</button>
-      <button onclick="support()">📩 Support</button>
-    </div>
-  </div>
+<div class="actions">
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
+<button onclick="openDeposit()">💳 Recharger</button>
+<button onclick="support()">📩 Support</button>
+</div>
+</div>
 
-  <!-- MODAL -->
-  <div id="depositModal" class="modal">
-    <div class="modal-content" id="modalContent">
-      <h3>Choisir un dépôt</h3>
-      <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
-      <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
-      <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
-      <button class="close-btn" onclick="closeModal()">Fermer</button>
-    </div>
-  </div>
+<!-- MODAL -->
+<div id="modal" class="modal">
+<div class="modal-content" id="modalContent"></div>
+</div>
 
-  <script>
-    const addresses = {
-      BTC: "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
-      ETH: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
-      USDT: "0x5A652C891ee6F1cAF45c829A0e42f81856524939"
-    };
+<script>
 
-    function recharge() {
-      document.getElementById("depositModal").style.display = "flex";
-    }
+const addresses = {
+BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
+ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
+};
 
-    function closeModal() {
-      document.getElementById("depositModal").style.display = "none";
-    }
+function openDeposit(){
+document.getElementById("modal").style.display="flex";
 
-    function selectCrypto(crypto) {
-      const modal = document.getElementById("modalContent");
+document.getElementById("modalContent").innerHTML=`
+<h3>💰 DÉPÔT CRYPTO</h3>
+<div class="info">Choisissez votre crypto:</div>
+<div class="info">✅ Paiement instantané</div>
+<div class="info">✅ Confirmation automatique</div>
+<div class="info">✅ Minimum 10€</div>
 
-      modal.innerHTML = `
-        <h3>Dépôt ${crypto}</h3>
-        <p style="word-break: break-all; margin:15px 0; font-size:14px;">
-          ${addresses[crypto]}
-        </p>
-        <button onclick="copyAddress('${addresses[crypto]}')">
-          Copier l'adresse
-        </button>
-        <button onclick="resetModal()">
-          ⬅ Retour
-        </button>
-        <button class="close-btn" onclick="closeModal()">
-          Fermer
-        </button>
-      `;
-    }
+<div class="grid">
+<button onclick="selectCrypto('USDT')">USDT (ERC20)</button>
+<button onclick="selectCrypto('USDC')">USDC (ERC20)</button>
+<button onclick="selectCrypto('BTC')">₿ Bitcoin</button>
+<button onclick="selectCrypto('ETH')">Ξ Ethereum</button>
+<button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
+</div>
+`;
+}
 
-    function resetModal() {
-      const modal = document.getElementById("modalContent");
+function selectCrypto(crypto){
+document.getElementById("modalContent").innerHTML=`
+<h3>💰 DÉPÔT EN ${crypto}</h3>
+<div class="info">Sélectionnez le montant:</div>
+<div class="info">💡 Minimum: 10€ | Maximum: 1000€</div>
+<div class="info">🔄 Réception directe</div>
+<div class="info">⚠️ NE CLIQUEZ QU'UNE SEULE FOIS !</div>
 
-      modal.innerHTML = `
-        <h3>Choisir un dépôt</h3>
-        <button onclick="selectCrypto('BTC')">₿ Bitcoin (BTC)</button>
-        <button onclick="selectCrypto('ETH')">Ξ Ethereum (ETH)</button>
-        <button onclick="selectCrypto('USDT')">₮ USDT (ERC20)</button>
-        <button class="close-btn" onclick="closeModal()">Fermer</button>
-      `;
-    }
+<div class="grid">
+<button onclick="showAddress('${crypto}')">10€</button>
+<button onclick="showAddress('${crypto}')">25€</button>
+<button onclick="showAddress('${crypto}')">50€</button>
+<button onclick="showAddress('${crypto}')">100€</button>
+<button onclick="showAddress('${crypto}')">250€</button>
+<button onclick="showAddress('${crypto}')">500€</button>
+<button class="full" onclick="showAddress('${crypto}')">💰 Montant personnalisé</button>
+<button class="full back-btn" onclick="openDeposit()">⬅ Retour</button>
+</div>
+`;
+}
 
-    function copyAddress(address) {
-      navigator.clipboard.writeText(address);
-      alert("Adresse copiée");
-    }
+function showAddress(crypto){
+document.getElementById("modalContent").innerHTML=`
+<h3>Dépôt ${crypto}</h3>
+<p style="word-break:break-all;font-size:13px;margin:15px 0;">
+${addresses[crypto]}
+</p>
+<button onclick="copyAddress('${addresses[crypto]}')">
+Copier l'adresse
+</button>
+<button class="back-btn" onclick="selectCrypto('${crypto}')">
+⬅ Retour
+</button>
+<button class="close-btn" onclick="closeModal()">
+Fermer
+</button>
+`;
+}
 
-    function openShop() {
-      alert("Boutique bientôt disponible");
-    }
+function copyAddress(addr){
+navigator.clipboard.writeText(addr);
+alert("Adresse copiée");
+}
 
-    function support() {
-      alert("Contact support");
-    }
-  </script>
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+function openShop(){
+alert("Boutique bientôt disponible");
+}
+
+function support(){
+alert("Support bientôt disponible");
+}
+
+</script>
 
 </body>
 </html>
