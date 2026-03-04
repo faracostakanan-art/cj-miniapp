@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+  background: #111;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  padding-top: 100px;
+}
+button {
+  background: #2b6df6;
+  border: none;
+  padding: 15px 25px;
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<h1>CJ Mini App</h1>
+<p>Application connectée à Telegram</p>
+
+<button onclick="alert('Ça fonctionne')">TEST</button>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+</script>
+
+</body>
+</html>
