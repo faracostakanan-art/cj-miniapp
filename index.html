@@ -39,22 +39,9 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <!-- HOME -->
 <div class="app" id="home">
   <div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
-
-  <div class="card balance">
-    <span>Solde</span>
-    <span class="amount" id="balance">0€</span>
-  </div>
-
-  <div class="card">
-    <h3>Programme fidélité</h3>
-    <p>500€ rechargés = 90€ bonus</p>
-  </div>
-
-  <div class="card">
-    <h3>📦 Historique des commandes</h3>
-    <div id="orders"></div>
-  </div>
-
+  <div class="card balance"><span>Solde</span><span class="amount" id="balance">0€</span></div>
+  <div class="card"><h3>Programme fidélité</h3><p>500€ rechargés = 90€ bonus</p></div>
+  <div class="card"><h3>📦 Historique des commandes</h3><div id="orders"></div></div>
   <div class="actions">
     <button onclick="openShop()">🛒 Ouvrir la boutique</button>
     <button onclick="openDeposit()">💳 Recharger</button>
@@ -68,13 +55,11 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
   <div class="card">
     <h3>🛒 Boutique</h3>
     <div class="products" id="productsList"></div>
-
     <div class="card">
       <h3>🛍 Panier</h3>
       <div id="cartList"></div>
       <button onclick="checkout()">💳 Acheter le panier</button>
     </div>
-
     <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
   </div>
 </div>
@@ -113,9 +98,10 @@ let products = JSON.parse(localStorage.getItem("products")) || [
   {name:"Produit Gold",price:50,img:"https://via.placeholder.com/300",desc:"Pack complet"},
   {name:"Produit Ultimate",price:100,img:"https://via.placeholder.com/300",desc:"Accès total"}
 ];
-
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
 
+/* PANIER */
+let cart = [];
 function renderProducts(){
   const container = document.getElementById("productsList");
   container.innerHTML = "";
@@ -124,14 +110,12 @@ function renderProducts(){
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>${p.desc}</p>
-      <button onclick="addToCart('${p.name}',${p.price})">Acheter ${p.price}€</button>
+      <button onclick="addToCart('${p.name}',${p.price})">Ajouter au panier ${p.price}€</button>
     </div>`;
   });
 }
 renderProducts();
 
-/* PANIER */
-let cart = [];
 function addToCart(name,price){
   if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
   cart.push({name,price});
@@ -213,10 +197,7 @@ function openAdmin(){
     document.getElementById("adminPanel").style.display="block";
   }else{alert("Mot de passe incorrect");}
 }
-function closeAdmin(){
-  document.getElementById("adminPanel").style.display="none";
-  document.getElementById("home").style.display="block";
-}
+function closeAdmin(){document.getElementById("adminPanel").style.display="none";document.getElementById("home").style.display="block";}
 
 /* AJOUT PRODUIT */
 function addProductPrompt(){
