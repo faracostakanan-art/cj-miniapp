@@ -36,20 +36,25 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 </head>
 <body>
 
+<!-- HOME -->
 <div class="app" id="home">
   <div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
+
   <div class="card balance">
     <span>Solde</span>
     <span class="amount" id="balance">0€</span>
   </div>
+
   <div class="card">
     <h3>Programme fidélité</h3>
     <p>500€ rechargés = 90€ bonus</p>
   </div>
+
   <div class="card">
     <h3>📦 Historique des commandes</h3>
     <div id="orders"></div>
   </div>
+
   <div class="actions">
     <button onclick="openShop()">🛒 Ouvrir la boutique</button>
     <button onclick="openDeposit()">💳 Recharger</button>
@@ -58,6 +63,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
   </div>
 </div>
 
+<!-- SHOP -->
 <div id="shopPage" class="app" style="display:none">
   <div class="card">
     <h3>🛒 Boutique</h3>
@@ -71,6 +77,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
   </div>
 </div>
 
+<!-- ADMIN PANEL -->
 <div id="adminPanel" class="app" style="display:none">
   <div class="card">
     <h3>🛠 Panel Admin</h3>
@@ -80,28 +87,21 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
   </div>
 </div>
 
+<!-- MODAL -->
 <div id="modal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg){ tg.expand(); }
 
-/* USER ID */
-let userId = localStorage.getItem("userId");
-if(!userId){
-  userId = 'user_' + Math.random().toString(36).substring(2,10);
-  localStorage.setItem("userId",userId);
-}
-
 /* SOLDE */
 let balance = localStorage.getItem("balance") ? parseFloat(localStorage.getItem("balance")) : 100;
 document.getElementById("balance").innerText = balance+"€";
 
 /* HISTORIQUE */
-let allOrders = JSON.parse(localStorage.getItem("orders")) || [];
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
 function updateOrders(){
-  let userOrders = allOrders.filter(o=>o.user===userId);
-  document.getElementById("orders").innerHTML = userOrders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
+  document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
 }
 updateOrders();
 
@@ -156,11 +156,11 @@ function checkout(){
   document.getElementById("balance").innerText = balance+"€";
 
   cart.forEach(p=>{
-    allOrders.push({user:userId,name:p.name,price:p.price});
+    orders.push(p);
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-  localStorage.setItem("orders",JSON.stringify(allOrders));
+  localStorage.setItem("orders",JSON.stringify(orders));
   localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
   localStorage.setItem("products",JSON.stringify(products));
 
@@ -176,7 +176,13 @@ function openShop(){document.getElementById("home").style.display="none";documen
 function closeShop(){document.getElementById("home").style.display="block";document.getElementById("shopPage").style.display="none";}
 
 /* DEPOT CRYPTO */
-const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
+const addresses={
+BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
+ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
+USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
+};
+
 function openDeposit(){
   const modal = document.getElementById("modal");
   const content = document.getElementById("modalContent");
@@ -191,6 +197,7 @@ function openDeposit(){
       <button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
     </div>`;
 }
+
 function selectCrypto(c){
   const content = document.getElementById("modalContent");
   content.innerHTML = `
@@ -201,6 +208,7 @@ function selectCrypto(c){
       <button class="full back-btn" onclick="openDeposit()">⬅ Retour</button>
     </div>`;
 }
+
 function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée");}
 function closeModal(){document.getElementById("modal").style.display="none";}
 function support(){alert("Support bientôt disponible");}
