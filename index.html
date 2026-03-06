@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CJBOT</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:radial-gradient(circle at top,#1e293b,#0b1220 70%);color:white;}
 .app{padding:24px;}
@@ -31,68 +30,63 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 .product-card img{width:100%;border-radius:10px;}
 .skeleton{background:linear-gradient(90deg,#1e293b,#334155,#1e293b);background-size:200%;animation:loading 1.5s infinite;height:80px;border-radius:10px;margin-bottom:10px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1);}}
 @keyframes loading{0%{background-position:200%}100%{background-position:-200%}}
 </style>
 </head>
-
 <body>
 
 <!-- HOME -->
 <div class="app" id="home">
-  <div class="header">
-    <div class="avatar">CJ</div>
-    <h1>CJBOT</h1>
-    <p>Boutique Premium Crypto</p>
-  </div>
+<div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
 
-  <div class="card balance">
-    <span>Solde</span>
-    <span class="amount" id="balance">0€</span>
-  </div>
+<div class="card balance">
+<span>Solde</span>
+<span class="amount" id="balance">0€</span>
+</div>
 
-  <div class="card">
-    <h3>Programme fidélité</h3>
-    <p>500€ rechargés = 90€ bonus</p>
-  </div>
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>500€ rechargés = 90€ bonus</p>
+</div>
 
-  <div class="card">
-    <h3>📦 Historique des commandes</h3>
-    <div id="orders"></div>
-  </div>
+<div class="card">
+<h3>📦 Historique des commandes</h3>
+<div id="orders"></div>
+</div>
 
-  <div class="actions">
-    <button onclick="openShop()">🛒 Ouvrir la boutique</button>
-    <button onclick="openDeposit()">💳 Recharger</button>
-    <button onclick="support()">📩 Support</button>
-    <button onclick="openAdmin()">🔒 Admin</button>
-  </div>
+<div class="actions">
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
+<button onclick="openDeposit()">💳 Recharger</button>
+<button onclick="support()">📩 Support</button>
+<button onclick="openAdmin()">🔒 Admin</button>
+</div>
 </div>
 
 <!-- SHOP -->
 <div id="shopPage" class="app" style="display:none">
-  <div class="card">
-    <h3>🛒 Boutique</h3>
-    <div class="products" id="productsList"></div>
+<div class="card">
+<h3>🛒 Boutique</h3>
+<div class="products" id="productsList"></div>
 
-    <div class="card">
-      <h3>🛍 Panier</h3>
-      <div id="cartList"></div>
-      <button onclick="checkout()">💳 Acheter le panier</button>
-    </div>
+<div class="card">
+<h3>🛍 Panier</h3>
+<div id="cartList"></div>
+<button onclick="checkout()">💳 Acheter le panier</button>
+</div>
 
-    <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
-  </div>
+<button class="back-btn" onclick="closeShop()">⬅ Retour</button>
+</div>
 </div>
 
 <!-- ADMIN PANEL -->
 <div id="adminPanel" class="app" style="display:none">
-  <div class="card">
-    <h3>🛠 Panel Admin</h3>
-    <button onclick="addProductPrompt()">➕ Ajouter un produit</button>
-    <button onclick="showRemovedProducts()">🗑 Produits retirés</button>
-    <button onclick="closeAdmin()">⬅ Fermer</button>
-  </div>
+<div class="card">
+<h3>🛠 Panel Admin</h3>
+<button onclick="addProductPrompt()">➕ Ajouter un produit</button>
+<button onclick="showRemovedProducts()">🗑 Produits retirés</button>
+<button onclick="closeAdmin()">⬅ Fermer</button>
+</div>
 </div>
 
 <!-- MODAL -->
@@ -109,7 +103,7 @@ document.getElementById("balance").innerText = balance+"€";
 /* HISTORIQUE */
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
 function updateOrders(){
-  document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
+  document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("");
 }
 updateOrders();
 
@@ -117,26 +111,25 @@ updateOrders();
 let products = JSON.parse(localStorage.getItem("products")) || [];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
 
-/* RENDER PRODUITS */
 function renderProducts(){
   const container = document.getElementById("productsList");
   container.innerHTML = "";
+  if(products.length===0){container.innerHTML="<p>Aucun produit disponible</p>"; return;}
   products.forEach(p=>{
     container.innerHTML += `<div class="product-card">
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>${p.desc}</p>
-      <button onclick="addToCart('${p.name}',${p.price})">Acheter ${p.price}€</button>
+      <button onclick="addToCart('${p.name}',${p.price},'${p.content}')">Acheter ${p.price}€</button>
     </div>`;
   });
 }
-renderProducts();
 
 /* PANIER */
 let cart = [];
-function addToCart(name,price){
+function addToCart(name,price,content){
   if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
-  cart.push({name,price});
+  cart.push({name,price,content});
   renderCart();
 }
 function removeFromCart(index){
@@ -152,7 +145,7 @@ function renderCart(){
   });
 }
 
-/* ACHAT PANIER */
+/* ACHAT */
 function checkout(){
   if(cart.length===0){alert("Panier vide"); return;}
   let total = cart.reduce((s,p)=>s+p.price,0);
@@ -166,6 +159,7 @@ function checkout(){
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
+
   localStorage.setItem("orders",JSON.stringify(orders));
   localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
   localStorage.setItem("products",JSON.stringify(products));
@@ -215,10 +209,7 @@ function openAdmin(){
     document.getElementById("adminPanel").style.display="block";
   }else{alert("Mot de passe incorrect");}
 }
-function closeAdmin(){
-  document.getElementById("adminPanel").style.display="none";
-  document.getElementById("home").style.display="block";
-}
+function closeAdmin(){document.getElementById("adminPanel").style.display="none";document.getElementById("home").style.display="block";}
 
 /* AJOUT PRODUIT */
 function addProductPrompt(){
@@ -226,15 +217,14 @@ function addProductPrompt(){
   let price = parseFloat(prompt("Prix (€):"));
   let img = prompt("URL image:");
   let desc = prompt("Description:");
-  if(name && !isNaN(price)){products.push({name,price,img,desc});localStorage.setItem("products",JSON.stringify(products));renderProducts();alert("Produit ajouté");}
+  let content = prompt("Contenu privé du produit:");
+  if(name && !isNaN(price)){products.push({name,price,img,desc,content});localStorage.setItem("products",JSON.stringify(products));renderProducts();alert("Produit ajouté");}
 }
 
 /* PRODUITS RETIRES */
 function showRemovedProducts(){
   if(removedProducts.length===0){alert("Aucun produit retiré"); return;}
-  let list = removedProducts.map((p,i)=>`
-    <div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>
-  `).join("");
+  let list = removedProducts.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>`).join("");
   document.getElementById("modal").style.display="flex";
   document.getElementById("modalContent").innerHTML=`<h3>Produits retirés</h3>${list}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
 }
@@ -247,7 +237,9 @@ function restoreProduct(index){
   renderProducts();
   showRemovedProducts();
 }
-</script>
 
+renderProducts();
+renderCart();
+</script>
 </body>
 </html>
