@@ -6,7 +6,6 @@
 <title>CJBOT - Boutique</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-/* ===== GLOBAL ===== */
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:radial-gradient(circle at top,#1e293b,#0b1220 70%);color:white;}
 .app{padding:24px;}
 .header{text-align:center;margin-bottom:40px;}
@@ -87,8 +86,8 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 <div class="card">
 <h3>🛠 Panel Admin</h3>
 <div style="margin-bottom:15px;">
-<button onclick="showProductsDashboard()">📦 Gérer les produits</button>
-<button onclick="showUsersDashboard()">👥 Gérer les utilisateurs</button>
+<button onclick="showProductsDashboard()">📦 Produits</button>
+<button onclick="showUsersDashboard()">👥 Utilisateurs</button>
 <button onclick="showStats()">📊 Statistiques</button>
 <button class="back-btn" onclick="closeAdmin()">⬅ Fermer</button>
 </div>
@@ -108,11 +107,11 @@ let balance = parseFloat(localStorage.getItem("balance")) || 0;
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
 let products = JSON.parse(localStorage.getItem("products")) || [];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
-let users = JSON.parse(localStorage.getItem("users")) || {}; // panel admin
+let users = JSON.parse(localStorage.getItem("users")) || {}; 
 
 document.getElementById("balance").innerText = balance+"€";
 
-/* ===== FONCTIONS COMMANDES ===== */
+/* ===== UTILITAIRES ===== */
 function updateOrders(){
   const container = document.getElementById("orders");
   container.innerHTML = orders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("");
@@ -152,19 +151,27 @@ function checkout(){
   balance -= total;
   localStorage.setItem("balance",balance);
   document.getElementById("balance").innerText = balance+"€";
+
   cart.forEach(p=>{
-    orders.push(p);
+    // Chaque produit garde son contenu privé pour l'acheteur
+    orders.push({
+      name: p.name,
+      price: p.price,
+      content: p.content
+    });
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-  localStorage.setItem("orders",JSON.stringify(orders));
-  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
-  localStorage.setItem("products",JSON.stringify(products));
-  cart=[];
+
+  localStorage.setItem("orders", JSON.stringify(orders));
+  localStorage.setItem("removedProducts", JSON.stringify(removedProducts));
+  localStorage.setItem("products", JSON.stringify(products));
+
+  cart = [];
   renderCart();
   renderProducts();
   updateOrders();
-  alert("Achat réussi !");
+  alert("Achat réussi ! Contenu privé disponible dans l'historique.");
 }
 
 /* ===== NAVIGATION ===== */
@@ -210,13 +217,14 @@ function closeAdmin(){document.getElementById("adminPanel").style.display="none"
 /* ===== DASHBOARD PRODUITS ===== */
 function showProductsDashboard(){
   let html = `<h4>Produits disponibles</h4><table>
-    <tr><th>Image</th><th>Nom</th><th>Prix</th><th>Description</th><th>Actions</th></tr>`;
+    <tr><th>Image</th><th>Nom</th><th>Prix</th><th>Description</th><th>Contenu privé</th><th>Actions</th></tr>`;
   products.forEach((p,i)=>{
     html += `<tr>
       <td><img src="${p.img}" style="width:50px"></td>
       <td>${p.name}</td>
       <td>${p.price}€</td>
       <td>${p.desc}</td>
+      <td>${p.content ? "✅" : "❌"} <button onclick="editPrivateContent(${i})">✏️</button></td>
       <td>
         <button onclick="editProduct(${i})">✏️</button>
         <button onclick="removeProduct(${i})">🗑</button>
@@ -226,40 +234,14 @@ function showProductsDashboard(){
   html += `</table><button onclick="addProductPrompt()">➕ Ajouter produit</button>`;
   document.getElementById("adminContent").innerHTML = html;
 }
-function addProductPrompt(){
-  let name = prompt("Nom du produit:");
-  let price = parseFloat(prompt("Prix (€):"));
-  let img = prompt("URL image:");
-  let desc = prompt("Description:");
-  let content = prompt("Contenu privé:");
-  if(name && !isNaN(price)){
-    products.push({name,price,img,desc,content});
-    localStorage.setItem("products",JSON.stringify(products));
+function editPrivateContent(index){
+  let current = products[index].content || "";
+  let newContent = prompt("Modifier le contenu privé:", current);
+  if(newContent !== null){
+    products[index].content = newContent;
+    localStorage.setItem("products", JSON.stringify(products));
     showProductsDashboard();
-    renderProducts();
   }
-}
-function editProduct(index){
-  let p = products[index];
-  let name = prompt("Nom du produit:",p.name);
-  let price = parseFloat(prompt("Prix (€):",p.price));
-  let img = prompt("URL image:",p.img);
-  let desc = prompt("Description:",p.desc);
-  let content = prompt("Contenu privé:",p.content);
-  if(name && !isNaN(price)){
-    products[index]={name,price,img,desc,content};
-    localStorage.setItem("products",JSON.stringify(products));
-    showProductsDashboard();
-    renderProducts();
-  }
-}
-function removeProduct(index){
-  removedProducts.push(products[index]);
-  products.splice(index,1);
-  localStorage.setItem("products",JSON.stringify(products));
-  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
-  showProductsDashboard();
-  renderProducts();
 }
 
 /* ===== DASHBOARD UTILISATEURS ===== */
@@ -271,12 +253,11 @@ function showUsersDashboard(){
     html += `<tr>
       <td>${u.username||"N/A"}</td>
       <td>${id}</td>
-      <td>${u.balance||0}€</td>
+      <td>${u.balance||0}€ <button onclick="adjustBalance('${id}')">💰</button></td>
       <td>${u.deposits||0}€</td>
-      <td>${u.refunds||0}/3</td>
+      <td>${u.refunds||0}/3 <button onclick="resetRefund('${id}')">🔄</button></td>
       <td>
-        <button onclick="adjustBalance(${id})">💰 Modifier solde</button>
-        <button onclick="resetRefund(${id})">🔄 Reset refund</button>
+        <button onclick="viewUserOrders('${id}')">📦 Commandes</button>
       </td>
     </tr>`;
   });
@@ -288,6 +269,13 @@ function adjustBalance(id){
   if(!isNaN(val)){users[id].balance=val;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
 }
 function resetRefund(id){users[id].refunds=0;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
+function viewUserOrders(id){
+  let uOrders = orders.filter(o=>o.userId===id);
+  if(uOrders.length===0){alert("Pas de commandes"); return;}
+  let html = uOrders.map(o=>`${o.name} - ${o.price}€<br>Contenu privé: ${o.content}`).join("<hr>");
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalContent").innerHTML = `<h4>Commandes de ${id}</h4>${html}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
+}
 
 /* ===== STATISTIQUES ===== */
 function showStats(){
