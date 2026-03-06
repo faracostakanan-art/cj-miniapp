@@ -127,7 +127,7 @@ margin:6px 0;
 font-size:14px;
 }
 
-/* PRODUCTS GRID */
+/* PRODUCTS */
 
 .products{
 display:grid;
@@ -148,12 +148,16 @@ animation:fadeIn .6s ease;
 transform:scale(1.05);
 }
 
+.product-card:active{
+transform:scale(0.95);
+}
+
 .product-card img{
 width:100%;
 border-radius:10px;
 }
 
-/* SKELETON LOADING */
+/* SKELETON */
 
 .skeleton{
 background:linear-gradient(
@@ -172,25 +176,13 @@ margin-bottom:10px;
 /* ANIMATIONS */
 
 @keyframes fadeIn{
-from{
-opacity:0;
-transform:translateY(20px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
 }
 
 @keyframes zoom{
-from{
-transform:scale(.8);
-opacity:0;
-}
-to{
-transform:scale(1);
-opacity:1;
-}
+from{transform:scale(.8);opacity:0;}
+to{transform:scale(1);opacity:1;}
 }
 
 @keyframes loading{
@@ -229,6 +221,46 @@ opacity:1;
 
 </div>
 
+
+<!-- BOUTIQUE -->
+
+<div id="shopPage" class="app" style="display:none">
+
+<div class="card">
+<h3>🛒 Boutique</h3>
+
+<div class="products">
+
+<div class="product-card">
+<img src="https://via.placeholder.com/300">
+<h4>Produit Premium</h4>
+<p>Accès VIP</p>
+<button onclick="addToCart('Produit Premium',25)">Acheter 25€</button>
+</div>
+
+<div class="product-card">
+<img src="https://via.placeholder.com/300">
+<h4>Produit Gold</h4>
+<p>Pack complet</p>
+<button onclick="addToCart('Produit Gold',50)">Acheter 50€</button>
+</div>
+
+<div class="product-card">
+<img src="https://via.placeholder.com/300">
+<h4>Produit Ultimate</h4>
+<p>Accès total</p>
+<button onclick="addToCart('Produit Ultimate',100)">Acheter 100€</button>
+</div>
+
+</div>
+
+<button class="back-btn" onclick="closeShop()">⬅ Retour</button>
+
+</div>
+
+</div>
+
+
 <div id="modal" class="modal">
 <div class="modal-content" id="modalContent"></div>
 </div>
@@ -237,6 +269,38 @@ opacity:1;
 
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg){ tg.expand(); }
+
+/* PANIER */
+
+let cart=[];
+
+function openShop(){
+
+document.querySelector(".app").style.display="none";
+document.getElementById("shopPage").style.display="block";
+
+}
+
+function closeShop(){
+
+document.querySelector(".app").style.display="block";
+document.getElementById("shopPage").style.display="none";
+
+}
+
+function addToCart(name,price){
+
+cart.push({name,price});
+
+if(tg){
+tg.showAlert(name+" ajouté au panier 🛒");
+}else{
+alert(name+" ajouté au panier");
+}
+
+}
+
+/* DEPOT */
 
 const addresses = {
 BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
@@ -333,14 +397,6 @@ alert("Adresse copiée");
 
 function closeModal(){
 document.getElementById("modal").style.display="none";
-}
-
-function openShop(){
-if(tg){
-tg.showAlert("Boutique bientôt disponible");
-}else{
-alert("Boutique bientôt disponible");
-}
 }
 
 function support(){
