@@ -30,7 +30,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 .product-card img{width:100%;border-radius:10px;}
 .skeleton{background:linear-gradient(90deg,#1e293b,#334155,#1e293b);background-size:200%;animation:loading 1.5s infinite;height:80px;border-radius:10px;margin-bottom:10px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1);}}
 @keyframes loading{0%{background-position:200%}100%{background-position:-200%}}
 </style>
 </head>
@@ -39,22 +39,9 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <!-- HOME -->
 <div class="app" id="home">
   <div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
-
-  <div class="card balance">
-    <span>Solde</span>
-    <span class="amount" id="balance">0€</span>
-  </div>
-
-  <div class="card">
-    <h3>Programme fidélité</h3>
-    <p>500€ rechargés = 90€ bonus</p>
-  </div>
-
-  <div class="card">
-    <h3>📦 Historique des commandes</h3>
-    <div id="orders"></div>
-  </div>
-
+  <div class="card balance"><span>Solde</span><span class="amount" id="balance">0€</span></div>
+  <div class="card"><h3>Programme fidélité</h3><p>500€ rechargés = 90€ bonus</p></div>
+  <div class="card"><h3>📦 Historique des commandes</h3><div id="orders"></div></div>
   <div class="actions">
     <button onclick="openShop()">🛒 Ouvrir la boutique</button>
     <button onclick="openDeposit()">💳 Recharger</button>
@@ -94,24 +81,32 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg){ tg.expand(); }
 
+/* UTILISATEUR */
+const userId = localStorage.getItem("userId") || Date.now();
+localStorage.setItem("userId", userId);
+
 /* SOLDE */
 let balance = localStorage.getItem("balance") ? parseFloat(localStorage.getItem("balance")) : 100;
 document.getElementById("balance").innerText = balance+"€";
 
 /* HISTORIQUE */
-let orders = JSON.parse(localStorage.getItem("orders")) || [];
+let allOrders = JSON.parse(localStorage.getItem("allOrders")) || [];
 function updateOrders(){
-  document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
+  const userOrders = allOrders.filter(o => o.user===userId);
+  document.getElementById("orders").innerHTML = userOrders.map((o,i)=>`
+    <div class="info">${o.name} - ${o.price}€ <button onclick="showContent(${i})" style="float:right">📄 Voir</button></div>
+  `).join("");
 }
 updateOrders();
 
 /* PRODUITS */
 let products = JSON.parse(localStorage.getItem("products")) || [
-  {name:"LOG",price:30,img:"https://via.placeholder.com/300",desc:"Catégorie LOG"},
-  {name:"CC",price:50,img:"https://via.placeholder.com/300",desc:"Catégorie CC"}
+  {name:"LOG",price:25,img:"https://via.placeholder.com/300",desc:"Catégorie LOG",content:"Contenu LOG exclusif",type:"texte"},
+  {name:"CC",price:50,img:"https://via.placeholder.com/300",desc:"Catégorie CC",content:"Contenu CC exclusif",type:"texte"}
 ];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
 
+/* RENDER PRODUITS */
 function renderProducts(){
   const container = document.getElementById("productsList");
   container.innerHTML = "";
@@ -133,10 +128,7 @@ function addToCart(name,price){
   cart.push({name,price});
   renderCart();
 }
-function removeFromCart(index){
-  cart.splice(index,1);
-  renderCart();
-}
+function removeFromCart(index){cart.splice(index,1); renderCart();}
 function renderCart(){
   const container = document.getElementById("cartList");
   if(cart.length===0){container.innerHTML="<p>Panier vide</p>"; return;}
@@ -151,43 +143,44 @@ function checkout(){
   if(cart.length===0){alert("Panier vide"); return;}
   let total = cart.reduce((s,p)=>s+p.price,0);
   if(total>balance){alert("Solde insuffisant"); return;}
-  balance -= total;
-  localStorage.setItem("balance",balance);
-  document.getElementById("balance").innerText = balance+"€";
+  balance -= total; document.getElementById("balance").innerText = balance+"€"; localStorage.setItem("balance",balance);
 
   cart.forEach(p=>{
-    orders.push(p);
+    allOrders.push({...p,user:userId});
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-  localStorage.setItem("orders",JSON.stringify(orders));
-  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
+  cart = [];
   localStorage.setItem("products",JSON.stringify(products));
-
-  cart=[];
-  renderCart();
-  renderProducts();
-  updateOrders();
+  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
+  localStorage.setItem("allOrders",JSON.stringify(allOrders));
+  renderCart(); renderProducts(); updateOrders();
   alert("Achat réussi !");
 }
 
+/* CONTENU EXCLUSIF */
+function showContent(index){
+  const userOrders = allOrders.filter(o=>o.user===userId);
+  const order = userOrders[index];
+  if(!order) return;
+  let modalHtml = `<h3>Contenu de ${order.name}</h3>`;
+  if(order.type==="texte"){modalHtml += `<p>${order.content}</p>`;}
+  else if(order.type==="lien"){modalHtml += `<p><a href="${order.content}" target="_blank" style="color:#3b82f6;">Ouvrir le lien</a></p>`;}
+  else if(order.type==="fichier"){modalHtml += `<p><a href="${order.content}" download style="color:#3b82f6;">Télécharger le fichier</a></p>`;}
+  modalHtml += `<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalContent").innerHTML = modalHtml;
+}
+
 /* NAVIGATION */
-function openShop(){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="block";}
-function closeShop(){document.getElementById("home").style.display="block";document.getElementById("shopPage").style.display="none";}
+function openShop(){document.getElementById("home").style.display="none"; document.getElementById("shopPage").style.display="block";}
+function closeShop(){document.getElementById("home").style.display="block"; document.getElementById("shopPage").style.display="none";}
 
 /* DEPOT CRYPTO */
-const addresses={
-BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
-ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
-USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",
-USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
-};
-
+const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
 function openDeposit(){
-  const modal = document.getElementById("modal");
-  const content = document.getElementById("modalContent");
-  modal.style.display = "flex";
-  content.innerHTML = `
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalContent").innerHTML=`
     <h3>💰 DÉPÔT CRYPTO</h3>
     <div class="grid">
       <button onclick="selectCrypto('USDT')">USDT</button>
@@ -197,18 +190,13 @@ function openDeposit(){
       <button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
     </div>`;
 }
-
 function selectCrypto(c){
-  const content = document.getElementById("modalContent");
-  content.innerHTML = `
+  document.getElementById("modalContent").innerHTML=`
     <h3>Dépôt ${c}</h3>
-    <p style="word-break:break-all; margin:10px 0; font-size:14px;">${addresses[c]}</p>
-    <div class="grid">
-      <button onclick="copyAddress('${addresses[c]}')">Copier</button>
-      <button class="full back-btn" onclick="openDeposit()">⬅ Retour</button>
-    </div>`;
+    <p style="word-break:break-all">${addresses[c]}</p>
+    <button onclick="copyAddress('${addresses[c]}')">Copier</button>
+    <button class="back-btn" onclick="openDeposit()">⬅ Retour</button>`;
 }
-
 function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée");}
 function closeModal(){document.getElementById("modal").style.display="none";}
 function support(){alert("Support bientôt disponible");}
@@ -216,11 +204,8 @@ function support(){alert("Support bientôt disponible");}
 /* PANEL ADMIN */
 function openAdmin(){
   let pwd = prompt("Mot de passe admin:");
-  if(pwd==="CJADMIN123"){
-    document.getElementById("home").style.display="none";
-    document.getElementById("shopPage").style.display="none";
-    document.getElementById("adminPanel").style.display="block";
-  }else{alert("Mot de passe incorrect");}
+  if(pwd==="CJADMIN123"){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="none";document.getElementById("adminPanel").style.display="block";}
+  else{alert("Mot de passe incorrect");}
 }
 function closeAdmin(){document.getElementById("adminPanel").style.display="none";document.getElementById("home").style.display="block";}
 
@@ -230,15 +215,20 @@ function addProductPrompt(){
   let price = parseFloat(prompt("Prix (€):"));
   let img = prompt("URL image:");
   let desc = prompt("Description:");
-  if(name && !isNaN(price)){products.push({name,price,img,desc});localStorage.setItem("products",JSON.stringify(products));renderProducts();alert("Produit ajouté");}
+  let type = prompt("Type de contenu (texte/lien/fichier):").toLowerCase();
+  let content = prompt("Contenu exclusif (texte, URL ou fichier):");
+  if(name && !isNaN(price) && ["texte","lien","fichier"].includes(type)){
+    products.push({name,price,img,desc,content,type});
+    localStorage.setItem("products",JSON.stringify(products));
+    renderProducts();
+    alert("Produit ajouté");
+  } else { alert("Type de contenu invalide"); }
 }
 
 /* PRODUITS RETIRES */
 function showRemovedProducts(){
   if(removedProducts.length===0){alert("Aucun produit retiré"); return;}
-  let list = removedProducts.map((p,i)=>`
-    <div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>
-  `).join("");
+  let list = removedProducts.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>`).join("");
   document.getElementById("modal").style.display="flex";
   document.getElementById("modalContent").innerHTML=`<h3>Produits retirés</h3>${list}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
 }
