@@ -36,25 +36,20 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 </head>
 <body>
 
-<!-- HOME -->
 <div class="app" id="home">
   <div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
-
   <div class="card balance">
     <span>Solde</span>
     <span class="amount" id="balance">0€</span>
   </div>
-
   <div class="card">
     <h3>Programme fidélité</h3>
     <p>500€ rechargés = 90€ bonus</p>
   </div>
-
   <div class="card">
     <h3>📦 Historique des commandes</h3>
     <div id="orders"></div>
   </div>
-
   <div class="actions">
     <button onclick="openShop()">🛒 Ouvrir la boutique</button>
     <button onclick="openDeposit()">💳 Recharger</button>
@@ -63,33 +58,19 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
   </div>
 </div>
 
-<!-- SHOP -->
 <div id="shopPage" class="app" style="display:none">
   <div class="card">
     <h3>🛒 Boutique</h3>
-
-    <div class="card">
-      <h4>Filtrer par catégorie</h4>
-      <div class="grid">
-        <button onclick="filterCategory('ALL')">Tous</button>
-        <button onclick="filterCategory('LOG')">LOG</button>
-        <button onclick="filterCategory('CC')">CC</button>
-      </div>
-    </div>
-
     <div class="products" id="productsList"></div>
-
     <div class="card">
       <h3>🛍 Panier</h3>
       <div id="cartList"></div>
       <button onclick="checkout()">💳 Acheter le panier</button>
     </div>
-
     <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="adminPanel" class="app" style="display:none">
   <div class="card">
     <h3>🛠 Panel Admin</h3>
@@ -99,44 +80,46 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
   </div>
 </div>
 
-<!-- MODAL -->
 <div id="modal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg){ tg.expand(); }
 
+/* USER ID */
+let userId = localStorage.getItem("userId");
+if(!userId){
+  userId = 'user_' + Math.random().toString(36).substring(2,10);
+  localStorage.setItem("userId",userId);
+}
+
 /* SOLDE */
 let balance = localStorage.getItem("balance") ? parseFloat(localStorage.getItem("balance")) : 100;
 document.getElementById("balance").innerText = balance+"€";
 
 /* HISTORIQUE */
-let orders = JSON.parse(localStorage.getItem("orders")) || [];
+let allOrders = JSON.parse(localStorage.getItem("orders")) || [];
 function updateOrders(){
-  document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
+  let userOrders = allOrders.filter(o=>o.user===userId);
+  document.getElementById("orders").innerHTML = userOrders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
 }
 updateOrders();
 
 /* PRODUITS */
 let products = JSON.parse(localStorage.getItem("products")) || [
-  {name:"LOG",price:20,img:"https://via.placeholder.com/300",desc:"Catégorie LOG"},
+  {name:"LOG",price:30,img:"https://via.placeholder.com/300",desc:"Catégorie LOG"},
   {name:"CC",price:50,img:"https://via.placeholder.com/300",desc:"Catégorie CC"}
 ];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
-let currentCategory = 'ALL';
 
-/* FILTRAGE */
-function filterCategory(cat){currentCategory=cat; renderProducts();}
-
-/* RENDER PRODUITS */
 function renderProducts(){
   const container = document.getElementById("productsList");
-  container.innerHTML="";
-  let displayProducts = currentCategory==='ALL'?products:products.filter(p=>p.name===currentCategory);
-  if(displayProducts.length===0){container.innerHTML="<p>Aucun produit disponible</p>"; return;}
-  displayProducts.forEach(p=>{
-    container.innerHTML+=`<div class="product-card">
-      <img src="${p.img}"><h4>${p.name}</h4><p>${p.desc}</p>
+  container.innerHTML = "";
+  products.forEach(p=>{
+    container.innerHTML += `<div class="product-card">
+      <img src="${p.img}">
+      <h4>${p.name}</h4>
+      <p>${p.desc}</p>
       <button onclick="addToCart('${p.name}',${p.price})">Acheter ${p.price}€</button>
     </div>`;
   });
@@ -144,18 +127,23 @@ function renderProducts(){
 renderProducts();
 
 /* PANIER */
-let cart=[];
+let cart = [];
 function addToCart(name,price){
   if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
   cart.push({name,price});
   renderCart();
 }
-function removeFromCart(index){cart.splice(index,1); renderCart();}
+function removeFromCart(index){
+  cart.splice(index,1);
+  renderCart();
+}
 function renderCart(){
   const container = document.getElementById("cartList");
   if(cart.length===0){container.innerHTML="<p>Panier vide</p>"; return;}
-  container.innerHTML="";
-  cart.forEach((p,i)=>container.innerHTML+=`<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`);
+  container.innerHTML = "";
+  cart.forEach((p,i)=>{
+    container.innerHTML += `<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`;
+  });
 }
 
 /* ACHAT */
@@ -163,18 +151,19 @@ function checkout(){
   if(cart.length===0){alert("Panier vide"); return;}
   let total = cart.reduce((s,p)=>s+p.price,0);
   if(total>balance){alert("Solde insuffisant"); return;}
-  balance-=total;
+  balance -= total;
   localStorage.setItem("balance",balance);
-  document.getElementById("balance").innerText=balance+"€";
+  document.getElementById("balance").innerText = balance+"€";
 
   cart.forEach(p=>{
-    orders.push(p);
+    allOrders.push({user:userId,name:p.name,price:p.price});
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-  localStorage.setItem("orders",JSON.stringify(orders));
+  localStorage.setItem("orders",JSON.stringify(allOrders));
   localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
   localStorage.setItem("products",JSON.stringify(products));
+
   cart=[];
   renderCart();
   renderProducts();
@@ -189,8 +178,10 @@ function closeShop(){document.getElementById("home").style.display="block";docum
 /* DEPOT CRYPTO */
 const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
 function openDeposit(){
-  document.getElementById("modal").style.display="flex";
-  document.getElementById("modalContent").innerHTML=`
+  const modal = document.getElementById("modal");
+  const content = document.getElementById("modalContent");
+  modal.style.display = "flex";
+  content.innerHTML = `
     <h3>💰 DÉPÔT CRYPTO</h3>
     <div class="grid">
       <button onclick="selectCrypto('USDT')">USDT</button>
@@ -201,11 +192,14 @@ function openDeposit(){
     </div>`;
 }
 function selectCrypto(c){
-  document.getElementById("modalContent").innerHTML=`
+  const content = document.getElementById("modalContent");
+  content.innerHTML = `
     <h3>Dépôt ${c}</h3>
-    <p style="word-break:break-all">${addresses[c]}</p>
-    <button onclick="copyAddress('${addresses[c]}')">Copier</button>
-    <button class="back-btn" onclick="openDeposit()">⬅ Retour</button>`;
+    <p style="word-break:break-all; margin:10px 0; font-size:14px;">${addresses[c]}</p>
+    <div class="grid">
+      <button onclick="copyAddress('${addresses[c]}')">Copier</button>
+      <button class="full back-btn" onclick="openDeposit()">⬅ Retour</button>
+    </div>`;
 }
 function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée");}
 function closeModal(){document.getElementById("modal").style.display="none";}
@@ -234,7 +228,9 @@ function addProductPrompt(){
 /* PRODUITS RETIRES */
 function showRemovedProducts(){
   if(removedProducts.length===0){alert("Aucun produit retiré"); return;}
-  let list = removedProducts.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>`).join("");
+  let list = removedProducts.map((p,i)=>`
+    <div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>
+  `).join("");
   document.getElementById("modal").style.display="flex";
   document.getElementById("modalContent").innerHTML=`<h3>Produits retirés</h3>${list}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
 }
