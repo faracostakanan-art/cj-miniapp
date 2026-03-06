@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,11 +56,16 @@ justify-content:space-between;
 font-size:18px;
 }
 
-.amount{color:#3b82f6;font-weight:600;}
+.amount{
+color:#3b82f6;
+font-weight:600;
+}
 
-/* BUTTON */
+/* BUTTONS */
 
-button{
+.actions button,
+.modal-content button,
+.buy{
 width:100%;
 padding:14px;
 margin-bottom:12px;
@@ -69,19 +73,41 @@ border-radius:14px;
 border:none;
 background:linear-gradient(90deg,#3b82f6,#2563eb);
 color:white;
-font-size:15px;
+font-size:16px;
 font-weight:600;
 cursor:pointer;
 transition:.25s;
 }
 
-button:hover{
+.buy:hover,
+.actions button:hover{
 transform:scale(1.04);
 box-shadow:0 5px 20px rgba(0,0,0,0.3);
 }
 
-.back-btn{background:#1f2937;}
 .close-btn{background:#374151;}
+.back-btn{background:#1f2937;}
+
+/* MODAL */
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:#111827;
+padding:25px;
+border-radius:20px;
+width:90%;
+max-width:380px;
+animation:zoom .3s ease;
+}
 
 /* GRID */
 
@@ -94,7 +120,10 @@ margin-top:15px;
 
 .full{grid-column:1/3;}
 
-.info{margin:6px 0;font-size:14px;}
+.info{
+margin:6px 0;
+font-size:14px;
+}
 
 /* PRODUCTS */
 
@@ -110,57 +139,15 @@ background:#1e293b;
 border-radius:14px;
 padding:15px;
 transition:.3s;
+animation:fadeIn .6s ease;
 }
 
 .product-card:hover{transform:scale(1.05);}
-.product-card:active{transform:scale(.95);}
+.product-card:active{transform:scale(0.95);}
 
 .product-card img{
 width:100%;
 border-radius:10px;
-}
-
-/* CART */
-
-.cart-page{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#020617;
-padding:20px;
-overflow:auto;
-}
-
-.cart-item{
-display:flex;
-justify-content:space-between;
-margin-bottom:10px;
-background:#1e293b;
-padding:10px;
-border-radius:8px;
-}
-
-/* MODAL */
-
-.modal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.6);
-backdrop-filter:blur(10px);
-justify-content:center;
-align-items:center;
-}
-
-.modal-content{
-background:#111827;
-padding:25px;
-border-radius:20px;
-width:90%;
-max-width:380px;
 }
 
 /* ANIMATIONS */
@@ -170,6 +157,11 @@ from{opacity:0;transform:translateY(20px);}
 to{opacity:1;transform:translateY(0);}
 }
 
+@keyframes zoom{
+from{transform:scale(.8);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
 </style>
 </head>
 
@@ -177,7 +169,7 @@ to{opacity:1;transform:translateY(0);}
 
 <!-- HOME -->
 
-<div class="app" id="homePage">
+<div class="app" id="home">
 
 <div class="header">
 <div class="avatar">CJ</div>
@@ -187,7 +179,7 @@ to{opacity:1;transform:translateY(0);}
 
 <div class="card balance">
 <span>Solde</span>
-<span class="amount">0.00€</span>
+<span class="amount" id="balance">0€</span>
 </div>
 
 <div class="card">
@@ -195,10 +187,16 @@ to{opacity:1;transform:translateY(0);}
 <p>500€ rechargés = 90€ bonus</p>
 </div>
 
-<button onclick="openShop()">🛒 Boutique</button>
-<button onclick="openCart()">🧺 Panier (<span id="cartCount">0</span>)</button>
+<div class="card">
+<h3>📦 Historique des commandes</h3>
+<div id="orders"></div>
+</div>
+
+<div class="actions">
+<button onclick="openShop()">🛒 Ouvrir la boutique</button>
 <button onclick="openDeposit()">💳 Recharger</button>
 <button onclick="support()">📩 Support</button>
+</div>
 
 </div>
 
@@ -207,28 +205,38 @@ to{opacity:1;transform:translateY(0);}
 <div id="shopPage" class="app" style="display:none">
 
 <div class="card">
-<h3>Boutique</h3>
 
-<div class="products" id="products"></div>
+<h3>🛒 Boutique</h3>
 
+<div class="products">
+
+<div class="product-card">
+<img src="https://via.placeholder.com/300">
+<h4>Produit Premium</h4>
+<p>Accès VIP</p>
+<button onclick="addToCart('Produit Premium',25)">Acheter 25€</button>
+</div>
+
+<div class="product-card">
+<img src="https://via.placeholder.com/300">
+<h4>Produit Gold</h4>
+<p>Pack complet</p>
+<button onclick="addToCart('Produit Gold',50)">Acheter 50€</button>
+</div>
+
+<div class="product-card">
+<img src="https://via.placeholder.com/300">
+<h4>Produit Ultimate</h4>
+<p>Accès total</p>
+<button onclick="addToCart('Produit Ultimate',100)">Acheter 100€</button>
+</div>
+
+</div>
+
+<button onclick="checkout()">💳 Payer</button>
 <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
 
 </div>
-
-</div>
-
-<!-- CART -->
-
-<div id="cartPage" class="cart-page">
-
-<h2>Votre panier</h2>
-
-<div id="cartItems"></div>
-
-<h3>Total : <span id="cartTotal">0</span> €</h3>
-
-<button onclick="checkout()">Payer</button>
-<button class="back-btn" onclick="closeCart()">Retour</button>
 
 </div>
 
@@ -240,121 +248,95 @@ to{opacity:1;transform:translateY(0);}
 
 <script>
 
-const tg = window.Telegram?.WebApp;
-if(tg) tg.expand();
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if(tg){ tg.expand(); }
 
-/* PRODUITS */
+/* SOLDE */
 
-const products = [
+let balance = localStorage.getItem("balance")
+? parseFloat(localStorage.getItem("balance"))
+: 100;
 
-{name:"Produit Premium",price:25,img:"https://via.placeholder.com/300"},
-{name:"Produit Gold",price:50,img:"https://via.placeholder.com/300"},
-{name:"Produit Ultimate",price:100,img:"https://via.placeholder.com/300"}
+document.getElementById("balance").innerText = balance+"€";
 
-];
+/* HISTORIQUE */
 
-const container=document.getElementById("products");
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
 
-products.forEach((p,i)=>{
+function updateOrders(){
 
-container.innerHTML+=`
+let html="";
 
-<div class="product-card">
-
-<img src="${p.img}">
-<h4>${p.name}</h4>
-<p>${p.price}€</p>
-
-<button onclick="addToCart(${i})">
-Ajouter au panier
-</button>
-
-</div>
-
-`
-
+orders.forEach(o=>{
+html += `<div class="info">🛒 ${o.name} - ${o.price}€</div>`;
 });
+
+document.getElementById("orders").innerHTML = html;
+
+}
+
+updateOrders();
 
 /* PANIER */
 
 let cart=[];
 
-function addToCart(i){
+function addToCart(name,price){
 
-cart.push(products[i]);
+cart.push({name,price});
 
-updateCart();
-
-tg?.showAlert(products[i].name+" ajouté au panier");
+alert(name+" ajouté au panier 🛒");
 
 }
 
-function updateCart(){
-
-document.getElementById("cartCount").innerText=cart.length;
-
-let items="";
-let total=0;
-
-cart.forEach((item,index)=>{
-
-total+=item.price;
-
-items+=`
-
-<div class="cart-item">
-
-${item.name} - ${item.price}€
-
-<button onclick="removeItem(${index})">❌</button>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("cartItems").innerHTML=items;
-document.getElementById("cartTotal").innerText=total;
-
-}
-
-function removeItem(i){
-cart.splice(i,1);
-updateCart();
-}
-
-/* NAVIGATION */
-
-function openShop(){
-homePage.style.display="none";
-shopPage.style.display="block";
-}
-
-function closeShop(){
-homePage.style.display="block";
-shopPage.style.display="none";
-}
-
-function openCart(){
-cartPage.style.display="block";
-}
-
-function closeCart(){
-cartPage.style.display="none";
-}
-
-/* CHECKOUT */
+/* PAIEMENT */
 
 function checkout(){
 
-let total=cart.reduce((sum,i)=>sum+i.price,0);
+let total = cart.reduce((sum,i)=>sum+i.price,0);
 
-tg?.showAlert("Paiement de "+total+"€");
+if(total > balance){
+
+alert("Solde insuffisant");
+return;
 
 }
 
-/* DEPOT */
+balance -= total;
+
+localStorage.setItem("balance",balance);
+
+document.getElementById("balance").innerText = balance+"€";
+
+cart.forEach(i=>orders.push(i));
+
+localStorage.setItem("orders",JSON.stringify(orders));
+
+cart=[];
+
+updateOrders();
+
+alert("Paiement réussi");
+
+}
+
+/* SHOP NAV */
+
+function openShop(){
+
+document.getElementById("home").style.display="none";
+document.getElementById("shopPage").style.display="block";
+
+}
+
+function closeShop(){
+
+document.getElementById("home").style.display="block";
+document.getElementById("shopPage").style.display="none";
+
+}
+
+/* DEPOT CRYPTO */
 
 const addresses={
 BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",
@@ -365,40 +347,34 @@ USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"
 
 function openDeposit(){
 
-modal.style.display="flex";
+document.getElementById("modal").style.display="flex";
 
-modalContent.innerHTML=`
+document.getElementById("modalContent").innerHTML=`
 
-<h3>Dépôt Crypto</h3>
+<h3>💰 DÉPÔT CRYPTO</h3>
 
 <div class="grid">
-
-<button onclick="showAddress('BTC')">Bitcoin</button>
-<button onclick="showAddress('ETH')">Ethereum</button>
-<button onclick="showAddress('USDT')">USDT</button>
-<button onclick="showAddress('USDC')">USDC</button>
-
-<button class="full back-btn" onclick="closeModal()">Fermer</button>
-
+<button onclick="selectCrypto('USDT')">USDT</button>
+<button onclick="selectCrypto('USDC')">USDC</button>
+<button onclick="selectCrypto('BTC')">BTC</button>
+<button onclick="selectCrypto('ETH')">ETH</button>
+<button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
 </div>
-
 `;
 
 }
 
-function showAddress(c){
+function selectCrypto(c){
 
-modalContent.innerHTML=`
+document.getElementById("modalContent").innerHTML=`
 
 <h3>Dépôt ${c}</h3>
 
 <p style="word-break:break-all">${addresses[c]}</p>
 
-<button onclick="copyAddress('${addresses[c]}')">
-Copier adresse
-</button>
+<button onclick="copyAddress('${addresses[c]}')">Copier</button>
 
-<button class="back-btn" onclick="openDeposit()">Retour</button>
+<button class="back-btn" onclick="openDeposit()">⬅ Retour</button>
 
 `;
 
@@ -408,16 +384,20 @@ function copyAddress(a){
 
 navigator.clipboard.writeText(a);
 
-tg?.showAlert("Adresse copiée");
+alert("Adresse copiée");
 
 }
 
 function closeModal(){
-modal.style.display="none";
+document.getElementById("modal").style.display="none";
 }
 
+/* SUPPORT */
+
 function support(){
-tg?.showAlert("Support bientôt disponible");
+
+alert("Support bientôt disponible");
+
 }
 
 </script>
