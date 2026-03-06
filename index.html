@@ -39,9 +39,22 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <!-- HOME -->
 <div class="app" id="home">
   <div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
-  <div class="card balance"><span>Solde</span><span class="amount" id="balance">0€</span></div>
-  <div class="card"><h3>Programme fidélité</h3><p>500€ rechargés = 90€ bonus</p></div>
-  <div class="card"><h3>📦 Historique des commandes</h3><div id="orders"></div></div>
+
+  <div class="card balance">
+    <span>Solde</span>
+    <span class="amount" id="balance">0€</span>
+  </div>
+
+  <div class="card">
+    <h3>Programme fidélité</h3>
+    <p>500€ rechargés = 90€ bonus</p>
+  </div>
+
+  <div class="card">
+    <h3>📦 Historique des commandes</h3>
+    <div id="orders"></div>
+  </div>
+
   <div class="actions">
     <button onclick="openShop()">🛒 Ouvrir la boutique</button>
     <button onclick="openDeposit()">💳 Recharger</button>
@@ -54,20 +67,24 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <div id="shopPage" class="app" style="display:none">
   <div class="card">
     <h3>🛒 Boutique</h3>
-    <div>
-      <button onclick="showAllProducts()">🏠 Accueil Boutique</button>
-      <button onclick="showCart()">🛍 Panier (<span id='cartCount'>0</span>)</button>
-    </div>
     <div class="products" id="productsList"></div>
+
+    <div class="card">
+      <h3>🛍 Panier</h3>
+      <div id="cartList"></div>
+      <button onclick="checkout()">💳 Acheter le panier</button>
+    </div>
+
     <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
   </div>
 </div>
 
 <!-- ADMIN PANEL -->
-<div id="adminPanel" style="display:none" class="app">
+<div id="adminPanel" class="app" style="display:none">
   <div class="card">
     <h3>🛠 Panel Admin</h3>
     <button onclick="addProductPrompt()">➕ Ajouter un produit</button>
+    <button onclick="showRemovedProducts()">🗑 Produits retirés</button>
     <button onclick="closeAdmin()">⬅ Fermer</button>
   </div>
 </div>
@@ -78,17 +95,13 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg){ tg.expand(); }
-const userId = tg ? tg.initDataUnsafe.user.id : "guest";
 
 /* SOLDE */
-let balance = localStorage.getItem("balance_"+userId)
-  ? parseFloat(localStorage.getItem("balance_"+userId))
-  : 100;
+let balance = localStorage.getItem("balance") ? parseFloat(localStorage.getItem("balance")) : 100;
 document.getElementById("balance").innerText = balance+"€";
 
-/* HISTORIQUE PAR UTILISATEUR */
-let allOrders = JSON.parse(localStorage.getItem("orders")) || {};
-let orders = allOrders[userId] || [];
+/* HISTORIQUE */
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
 function updateOrders(){
   document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">🛒 ${o.name} - ${o.price}€</div>`).join("");
 }
@@ -100,103 +113,138 @@ let products = JSON.parse(localStorage.getItem("products")) || [
   {name:"Produit Gold",price:50,img:"https://via.placeholder.com/300",desc:"Pack complet"},
   {name:"Produit Ultimate",price:100,img:"https://via.placeholder.com/300",desc:"Accès total"}
 ];
-function renderProducts(list){
+
+let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
+
+function renderProducts(){
   const container = document.getElementById("productsList");
   container.innerHTML = "";
-  list.forEach(p=>{
+  products.forEach(p=>{
     container.innerHTML += `<div class="product-card">
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>${p.desc}</p>
-      <button onclick="addToCart('${p.name}',${p.price})">Ajouter au panier ${p.price}€</button>
+      <button onclick="addToCart('${p.name}',${p.price})">Acheter ${p.price}€</button>
     </div>`;
   });
 }
+renderProducts();
 
 /* PANIER */
-let cart=[];
+let cart = [];
 function addToCart(name,price){
+  if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
   cart.push({name,price});
-  document.getElementById('cartCount').innerText = cart.length;
-  alert(name+" ajouté au panier 🛒");
+  renderCart();
 }
-function showAllProducts(){renderProducts(products);}
-function showCart(){
-  if(cart.length===0){alert("Panier vide"); return;}
-  renderProducts(cart.map(c=>({name:c.name,price:c.price,img:"https://via.placeholder.com/300",desc:"Dans votre panier"})));
+function removeFromCart(index){
+  cart.splice(index,1);
+  renderCart();
+}
+function renderCart(){
+  const container = document.getElementById("cartList");
+  if(cart.length===0){container.innerHTML="<p>Panier vide</p>"; return;}
+  container.innerHTML = "";
+  cart.forEach((p,i)=>{
+    container.innerHTML += `<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`;
+  });
 }
 
-/* CHECKOUT */
+/* ACHAT */
 function checkout(){
   if(cart.length===0){alert("Panier vide"); return;}
-  let total = cart.reduce((s,i)=>s+i.price,0);
+  let total = cart.reduce((s,p)=>s+p.price,0);
   if(total>balance){alert("Solde insuffisant"); return;}
   balance -= total;
-  localStorage.setItem("balance_"+userId,balance);
+  localStorage.setItem("balance",balance);
   document.getElementById("balance").innerText = balance+"€";
 
-  if(!allOrders[userId]) allOrders[userId]=[];
-  allOrders[userId] = allOrders[userId].concat(cart);
-  localStorage.setItem("orders",JSON.stringify(allOrders));
-
-  // Retirer du stock global
-  cart.forEach(item=>{
-    products = products.filter(p=>p.name!==item.name);
+  cart.forEach(p=>{
+    orders.push(p);
+    removedProducts.push(p);
+    products = products.filter(prod=>prod.name!==p.name);
   });
+  localStorage.setItem("orders",JSON.stringify(orders));
+  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
   localStorage.setItem("products",JSON.stringify(products));
-  renderProducts(products);
 
-  orders = allOrders[userId];
-  cart = [];
-  document.getElementById('cartCount').innerText=0;
+  cart=[];
+  renderCart();
+  renderProducts();
   updateOrders();
-  alert("Paiement réussi");
+  alert("Achat réussi !");
 }
 
-/* NAVIGATION SHOP */
-function openShop(){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="block";showAllProducts();}
+/* NAVIGATION */
+function openShop(){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="block";}
 function closeShop(){document.getElementById("home").style.display="block";document.getElementById("shopPage").style.display="none";}
 
 /* DEPOT CRYPTO */
 const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
-function openDeposit(){document.getElementById("modal").style.display="flex";document.getElementById("modalContent").innerHTML=`
-<h3>💰 DÉPÔT CRYPTO</h3>
-<div class="grid">
-<button onclick="selectCrypto('USDT')">USDT</button>
-<button onclick="selectCrypto('USDC')">USDC</button>
-<button onclick="selectCrypto('BTC')">BTC</button>
-<button onclick="selectCrypto('ETH')">ETH</button>
-<button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
-</div>`;}
-function selectCrypto(c){document.getElementById("modalContent").innerHTML=`
-<h3>Dépôt ${c}</h3>
-<p style="word-break:break-all">${addresses[c]}</p>
-<button onclick="copyAddress('${addresses[c]}')">Copier</button>
-<button class="back-btn" onclick="openDeposit()">⬅ Retour</button>`;}
-function copyAddress(a){navigator.clipboard.writeText(a);alert("Adresse copiée");}
+function openDeposit(){
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalContent").innerHTML=`
+    <h3>💰 DÉPÔT CRYPTO</h3>
+    <div class="grid">
+      <button onclick="selectCrypto('USDT')">USDT</button>
+      <button onclick="selectCrypto('USDC')">USDC</button>
+      <button onclick="selectCrypto('BTC')">BTC</button>
+      <button onclick="selectCrypto('ETH')">ETH</button>
+      <button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
+    </div>`;
+}
+function selectCrypto(c){
+  document.getElementById("modalContent").innerHTML=`
+    <h3>Dépôt ${c}</h3>
+    <p style="word-break:break-all">${addresses[c]}</p>
+    <button onclick="copyAddress('${addresses[c]}')">Copier</button>
+    <button class="back-btn" onclick="openDeposit()">⬅ Retour</button>`;
+}
+function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée");}
 function closeModal(){document.getElementById("modal").style.display="none";}
-
-/* SUPPORT */
 function support(){alert("Support bientôt disponible");}
 
 /* PANEL ADMIN */
-let adminPassword = "CJADMIN123";
 function openAdmin(){
   let pwd = prompt("Mot de passe admin:");
-  if(pwd===adminPassword){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="none";document.getElementById("adminPanel").style.display="block";}
-  else alert("Mot de passe incorrect");
+  if(pwd==="CJADMIN123"){
+    document.getElementById("home").style.display="none";
+    document.getElementById("shopPage").style.display="none";
+    document.getElementById("adminPanel").style.display="block";
+  }else{alert("Mot de passe incorrect");}
 }
-function closeAdmin(){document.getElementById("adminPanel").style.display="none";document.getElementById("home").style.display="block";}
+function closeAdmin(){
+  document.getElementById("adminPanel").style.display="none";
+  document.getElementById("home").style.display="block";
+}
 
-/* ADMIN AJOUT PRODUIT */
+/* AJOUT PRODUIT */
 function addProductPrompt(){
-  let name=prompt("Nom du produit:");
-  let price=parseFloat(prompt("Prix (€):"));
-  let img=prompt("URL image:");
-  let desc=prompt("Description:");
-  if(name&&!isNaN(price)){products.push({name,price,img,desc});localStorage.setItem("products",JSON.stringify(products));renderProducts(products);alert("Produit ajouté");}
+  let name = prompt("Nom du produit:");
+  let price = parseFloat(prompt("Prix (€):"));
+  let img = prompt("URL image:");
+  let desc = prompt("Description:");
+  if(name && !isNaN(price)){products.push({name,price,img,desc});localStorage.setItem("products",JSON.stringify(products));renderProducts();alert("Produit ajouté");}
+}
+
+/* PRODUITS RETIRES */
+function showRemovedProducts(){
+  if(removedProducts.length===0){alert("Aucun produit retiré"); return;}
+  let list = removedProducts.map((p,i)=>`
+    <div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>
+  `).join("");
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalContent").innerHTML=`<h3>Produits retirés</h3>${list}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
+}
+function restoreProduct(index){
+  let p = removedProducts[index];
+  products.push(p);
+  removedProducts.splice(index,1);
+  localStorage.setItem("products",JSON.stringify(products));
+  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
+  renderProducts();
+  showRemovedProducts();
 }
 </script>
-
 </body>
 </html>
