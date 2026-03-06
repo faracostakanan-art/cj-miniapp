@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJBOT</title>
+<title>CJBOT - Boutique</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
+/* ===== GLOBAL ===== */
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:radial-gradient(circle at top,#1e293b,#0b1220 70%);color:white;}
 .app{padding:24px;}
 .header{text-align:center;margin-bottom:40px;}
@@ -14,12 +15,12 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 .card:hover{transform:scale(1.03);}
 .balance{display:flex;justify-content:space-between;font-size:18px;}
 .amount{color:#3b82f6;font-weight:600;}
-.actions button,.modal-content button,.buy{width:100%;padding:14px;margin-bottom:12px;border-radius:14px;border:none;background:linear-gradient(90deg,#3b82f6,#2563eb);color:white;font-size:16px;font-weight:600;cursor:pointer;transition:.25s;}
-.buy:hover,.actions button:hover{transform:scale(1.04);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
-.close-btn{background:#374151;}
+button{width:100%;padding:14px;margin-bottom:12px;border-radius:14px;border:none;background:linear-gradient(90deg,#3b82f6,#2563eb);color:white;font-size:16px;font-weight:600;cursor:pointer;transition:.25s;}
+button:hover{transform:scale(1.04);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
 .back-btn{background:#1f2937;}
+.close-btn{background:#374151;}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);justify-content:center;align-items:center;}
-.modal-content{background:#111827;padding:25px;border-radius:20px;width:90%;max-width:380px;animation:zoom .3s ease;}
+.modal-content{background:#111827;padding:25px;border-radius:20px;width:90%;max-width:480px;animation:zoom .3s ease;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;}
 .full{grid-column:1/3;}
 .info{margin:6px 0;font-size:14px;}
@@ -28,10 +29,12 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 .product-card:hover{transform:scale(1.05);}
 .product-card:active{transform:scale(0.95);}
 .product-card img{width:100%;border-radius:10px;}
-.skeleton{background:linear-gradient(90deg,#1e293b,#334155,#1e293b);background-size:200%;animation:loading 1.5s infinite;height:80px;border-radius:10px;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);}
+th{background:#111827;}
+td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 @keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1);}}
-@keyframes loading{0%{background-position:200%}100%{background-position:-200%}}
 </style>
 </head>
 <body>
@@ -83,9 +86,13 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <div id="adminPanel" class="app" style="display:none">
 <div class="card">
 <h3>🛠 Panel Admin</h3>
-<button onclick="addProductPrompt()">➕ Ajouter un produit</button>
-<button onclick="showRemovedProducts()">🗑 Produits retirés</button>
-<button onclick="closeAdmin()">⬅ Fermer</button>
+<div style="margin-bottom:15px;">
+<button onclick="showProductsDashboard()">📦 Gérer les produits</button>
+<button onclick="showUsersDashboard()">👥 Gérer les utilisateurs</button>
+<button onclick="showStats()">📊 Statistiques</button>
+<button class="back-btn" onclick="closeAdmin()">⬅ Fermer</button>
+</div>
+<div id="adminContent"></div>
 </div>
 </div>
 
@@ -96,20 +103,21 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg){ tg.expand(); }
 
-/* SOLDE */
-let balance = localStorage.getItem("balance") ? parseFloat(localStorage.getItem("balance")) : 0;
-document.getElementById("balance").innerText = balance+"€";
-
-/* HISTORIQUE */
+/* ===== VARIABLES ===== */
+let balance = parseFloat(localStorage.getItem("balance")) || 0;
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
-function updateOrders(){
-  document.getElementById("orders").innerHTML = orders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("");
-}
-updateOrders();
-
-/* PRODUITS */
 let products = JSON.parse(localStorage.getItem("products")) || [];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
+let users = JSON.parse(localStorage.getItem("users")) || {}; // panel admin
+
+document.getElementById("balance").innerText = balance+"€";
+
+/* ===== FONCTIONS COMMANDES ===== */
+function updateOrders(){
+  const container = document.getElementById("orders");
+  container.innerHTML = orders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("");
+}
+updateOrders();
 
 function renderProducts(){
   const container = document.getElementById("productsList");
@@ -125,27 +133,18 @@ function renderProducts(){
   });
 }
 
-/* PANIER */
 let cart = [];
 function addToCart(name,price,content){
   if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
   cart.push({name,price,content});
   renderCart();
 }
-function removeFromCart(index){
-  cart.splice(index,1);
-  renderCart();
-}
+function removeFromCart(index){cart.splice(index,1);renderCart();}
 function renderCart(){
   const container = document.getElementById("cartList");
   if(cart.length===0){container.innerHTML="<p>Panier vide</p>"; return;}
-  container.innerHTML = "";
-  cart.forEach((p,i)=>{
-    container.innerHTML += `<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`;
-  });
+  container.innerHTML = cart.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`).join("");
 }
-
-/* ACHAT */
 function checkout(){
   if(cart.length===0){alert("Panier vide"); return;}
   let total = cart.reduce((s,p)=>s+p.price,0);
@@ -153,17 +152,14 @@ function checkout(){
   balance -= total;
   localStorage.setItem("balance",balance);
   document.getElementById("balance").innerText = balance+"€";
-
   cart.forEach(p=>{
     orders.push(p);
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-
   localStorage.setItem("orders",JSON.stringify(orders));
   localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
   localStorage.setItem("products",JSON.stringify(products));
-
   cart=[];
   renderCart();
   renderProducts();
@@ -171,11 +167,11 @@ function checkout(){
   alert("Achat réussi !");
 }
 
-/* NAVIGATION */
+/* ===== NAVIGATION ===== */
 function openShop(){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="block";}
 function closeShop(){document.getElementById("home").style.display="block";document.getElementById("shopPage").style.display="none";}
 
-/* DEPOT CRYPTO */
+/* ===== DEPOT CRYPTO ===== */
 const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
 function openDeposit(){
   document.getElementById("modal").style.display="flex";
@@ -200,7 +196,7 @@ function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée
 function closeModal(){document.getElementById("modal").style.display="none";}
 function support(){alert("Support bientôt disponible");}
 
-/* PANEL ADMIN */
+/* ===== PANEL ADMIN ===== */
 function openAdmin(){
   let pwd = prompt("Mot de passe admin:");
   if(pwd==="GABON241"){
@@ -211,31 +207,97 @@ function openAdmin(){
 }
 function closeAdmin(){document.getElementById("adminPanel").style.display="none";document.getElementById("home").style.display="block";}
 
-/* AJOUT PRODUIT */
+/* ===== DASHBOARD PRODUITS ===== */
+function showProductsDashboard(){
+  let html = `<h4>Produits disponibles</h4><table>
+    <tr><th>Image</th><th>Nom</th><th>Prix</th><th>Description</th><th>Actions</th></tr>`;
+  products.forEach((p,i)=>{
+    html += `<tr>
+      <td><img src="${p.img}" style="width:50px"></td>
+      <td>${p.name}</td>
+      <td>${p.price}€</td>
+      <td>${p.desc}</td>
+      <td>
+        <button onclick="editProduct(${i})">✏️</button>
+        <button onclick="removeProduct(${i})">🗑</button>
+      </td>
+    </tr>`;
+  });
+  html += `</table><button onclick="addProductPrompt()">➕ Ajouter produit</button>`;
+  document.getElementById("adminContent").innerHTML = html;
+}
 function addProductPrompt(){
   let name = prompt("Nom du produit:");
   let price = parseFloat(prompt("Prix (€):"));
   let img = prompt("URL image:");
   let desc = prompt("Description:");
-  let content = prompt("Contenu privé du produit:");
-  if(name && !isNaN(price)){products.push({name,price,img,desc,content});localStorage.setItem("products",JSON.stringify(products));renderProducts();alert("Produit ajouté");}
+  let content = prompt("Contenu privé:");
+  if(name && !isNaN(price)){
+    products.push({name,price,img,desc,content});
+    localStorage.setItem("products",JSON.stringify(products));
+    showProductsDashboard();
+    renderProducts();
+  }
 }
-
-/* PRODUITS RETIRES */
-function showRemovedProducts(){
-  if(removedProducts.length===0){alert("Aucun produit retiré"); return;}
-  let list = removedProducts.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>`).join("");
-  document.getElementById("modal").style.display="flex";
-  document.getElementById("modalContent").innerHTML=`<h3>Produits retirés</h3>${list}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
+function editProduct(index){
+  let p = products[index];
+  let name = prompt("Nom du produit:",p.name);
+  let price = parseFloat(prompt("Prix (€):",p.price));
+  let img = prompt("URL image:",p.img);
+  let desc = prompt("Description:",p.desc);
+  let content = prompt("Contenu privé:",p.content);
+  if(name && !isNaN(price)){
+    products[index]={name,price,img,desc,content};
+    localStorage.setItem("products",JSON.stringify(products));
+    showProductsDashboard();
+    renderProducts();
+  }
 }
-function restoreProduct(index){
-  let p = removedProducts[index];
-  products.push(p);
-  removedProducts.splice(index,1);
+function removeProduct(index){
+  removedProducts.push(products[index]);
+  products.splice(index,1);
   localStorage.setItem("products",JSON.stringify(products));
   localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
+  showProductsDashboard();
   renderProducts();
-  showRemovedProducts();
+}
+
+/* ===== DASHBOARD UTILISATEURS ===== */
+function showUsersDashboard(){
+  let html = `<h4>Utilisateurs</h4><table>
+    <tr><th>Username</th><th>ID</th><th>Solde</th><th>Dépôts</th><th>Refunds</th><th>Actions</th></tr>`;
+  Object.keys(users).forEach(id=>{
+    let u = users[id];
+    html += `<tr>
+      <td>${u.username||"N/A"}</td>
+      <td>${id}</td>
+      <td>${u.balance||0}€</td>
+      <td>${u.deposits||0}€</td>
+      <td>${u.refunds||0}/3</td>
+      <td>
+        <button onclick="adjustBalance(${id})">💰 Modifier solde</button>
+        <button onclick="resetRefund(${id})">🔄 Reset refund</button>
+      </td>
+    </tr>`;
+  });
+  html += `</table>`;
+  document.getElementById("adminContent").innerHTML = html;
+}
+function adjustBalance(id){
+  let val = parseFloat(prompt("Nouveau solde:",users[id].balance||0));
+  if(!isNaN(val)){users[id].balance=val;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
+}
+function resetRefund(id){users[id].refunds=0;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
+
+/* ===== STATISTIQUES ===== */
+function showStats(){
+  let totalSales = orders.reduce((s,o)=>s+o.price,0);
+  let totalDeposits = Object.values(users).reduce((s,u)=>s+(u.deposits||0),0);
+  let html = `<h4>📊 Statistiques</h4>
+    <p>Total ventes : ${totalSales}€</p>
+    <p>Total dépôts utilisateurs : ${totalDeposits}€</p>
+    <p>Nombre utilisateurs : ${Object.keys(users).length}</p>`;
+  document.getElementById("adminContent").innerHTML = html;
 }
 
 renderProducts();
