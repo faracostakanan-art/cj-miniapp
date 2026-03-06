@@ -39,9 +39,22 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <!-- HOME -->
 <div class="app" id="home">
   <div class="header"><div class="avatar">CJ</div><h1>CJBOT</h1><p>Boutique Premium Crypto</p></div>
-  <div class="card balance"><span>Solde</span><span class="amount" id="balance">0€</span></div>
-  <div class="card"><h3>Programme fidélité</h3><p>500€ rechargés = 90€ bonus</p></div>
-  <div class="card"><h3>📦 Historique des commandes</h3><div id="orders"></div></div>
+
+  <div class="card balance">
+    <span>Solde</span>
+    <span class="amount" id="balance">0€</span>
+  </div>
+
+  <div class="card">
+    <h3>Programme fidélité</h3>
+    <p>500€ rechargés = 90€ bonus</p>
+  </div>
+
+  <div class="card">
+    <h3>📦 Historique des commandes</h3>
+    <div id="orders"></div>
+  </div>
+
   <div class="actions">
     <button onclick="openShop()">🛒 Ouvrir la boutique</button>
     <button onclick="openDeposit()">💳 Recharger</button>
@@ -54,12 +67,24 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background
 <div id="shopPage" class="app" style="display:none">
   <div class="card">
     <h3>🛒 Boutique</h3>
+
+    <div class="card">
+      <h4>Filtrer par catégorie</h4>
+      <div class="grid">
+        <button onclick="filterCategory('ALL')">Tous</button>
+        <button onclick="filterCategory('LOG')">LOG</button>
+        <button onclick="filterCategory('CC')">CC</button>
+      </div>
+    </div>
+
     <div class="products" id="productsList"></div>
+
     <div class="card">
       <h3>🛍 Panier</h3>
       <div id="cartList"></div>
       <button onclick="checkout()">💳 Acheter le panier</button>
     </div>
+
     <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
   </div>
 </div>
@@ -94,44 +119,43 @@ updateOrders();
 
 /* PRODUITS */
 let products = JSON.parse(localStorage.getItem("products")) || [
-  {name:"Produit Premium",price:25,img:"https://via.placeholder.com/300",desc:"Accès VIP"},
-  {name:"Produit Gold",price:50,img:"https://via.placeholder.com/300",desc:"Pack complet"},
-  {name:"Produit Ultimate",price:100,img:"https://via.placeholder.com/300",desc:"Accès total"}
+  {name:"LOG",price:20,img:"https://via.placeholder.com/300",desc:"Catégorie LOG"},
+  {name:"CC",price:50,img:"https://via.placeholder.com/300",desc:"Catégorie CC"}
 ];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
+let currentCategory = 'ALL';
 
-/* PANIER */
-let cart = [];
+/* FILTRAGE */
+function filterCategory(cat){currentCategory=cat; renderProducts();}
+
+/* RENDER PRODUITS */
 function renderProducts(){
   const container = document.getElementById("productsList");
-  container.innerHTML = "";
-  products.forEach(p=>{
-    container.innerHTML += `<div class="product-card">
-      <img src="${p.img}">
-      <h4>${p.name}</h4>
-      <p>${p.desc}</p>
-      <button onclick="addToCart('${p.name}',${p.price})">Ajouter au panier ${p.price}€</button>
+  container.innerHTML="";
+  let displayProducts = currentCategory==='ALL'?products:products.filter(p=>p.name===currentCategory);
+  if(displayProducts.length===0){container.innerHTML="<p>Aucun produit disponible</p>"; return;}
+  displayProducts.forEach(p=>{
+    container.innerHTML+=`<div class="product-card">
+      <img src="${p.img}"><h4>${p.name}</h4><p>${p.desc}</p>
+      <button onclick="addToCart('${p.name}',${p.price})">Acheter ${p.price}€</button>
     </div>`;
   });
 }
 renderProducts();
 
+/* PANIER */
+let cart=[];
 function addToCart(name,price){
   if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
   cart.push({name,price});
   renderCart();
 }
-function removeFromCart(index){
-  cart.splice(index,1);
-  renderCart();
-}
+function removeFromCart(index){cart.splice(index,1); renderCart();}
 function renderCart(){
   const container = document.getElementById("cartList");
   if(cart.length===0){container.innerHTML="<p>Panier vide</p>"; return;}
-  container.innerHTML = "";
-  cart.forEach((p,i)=>{
-    container.innerHTML += `<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`;
-  });
+  container.innerHTML="";
+  cart.forEach((p,i)=>container.innerHTML+=`<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`);
 }
 
 /* ACHAT */
@@ -139,9 +163,9 @@ function checkout(){
   if(cart.length===0){alert("Panier vide"); return;}
   let total = cart.reduce((s,p)=>s+p.price,0);
   if(total>balance){alert("Solde insuffisant"); return;}
-  balance -= total;
+  balance-=total;
   localStorage.setItem("balance",balance);
-  document.getElementById("balance").innerText = balance+"€";
+  document.getElementById("balance").innerText=balance+"€";
 
   cart.forEach(p=>{
     orders.push(p);
@@ -151,7 +175,6 @@ function checkout(){
   localStorage.setItem("orders",JSON.stringify(orders));
   localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
   localStorage.setItem("products",JSON.stringify(products));
-
   cart=[];
   renderCart();
   renderProducts();
@@ -211,9 +234,7 @@ function addProductPrompt(){
 /* PRODUITS RETIRES */
 function showRemovedProducts(){
   if(removedProducts.length===0){alert("Aucun produit retiré"); return;}
-  let list = removedProducts.map((p,i)=>`
-    <div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>
-  `).join("");
+  let list = removedProducts.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="restoreProduct(${i})" style="float:right">♻ Restaurer</button></div>`).join("");
   document.getElementById("modal").style.display="flex";
   document.getElementById("modalContent").innerHTML=`<h3>Produits retirés</h3>${list}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
 }
