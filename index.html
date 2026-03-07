@@ -3,28 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJAYSHOP - Boutique Crypto</title>
+<title>CJBOT - Boutique</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:radial-gradient(circle at top,#1e293b,#0b1220 70%);color:white;}
 .app{padding:24px;}
 .header{text-align:center;margin-bottom:40px;}
 .avatar{width:80px;height:80px;background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:50%;margin:auto;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;}
-.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border-radius:16px;padding:20px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);transition:.3s;}
+.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border-radius:16px;padding:20px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);animation:fadeIn .6s ease;transition:.3s;}
 .card:hover{transform:scale(1.03);}
 .balance{display:flex;justify-content:space-between;font-size:18px;}
 .amount{color:#3b82f6;font-weight:600;}
 button{width:100%;padding:14px;margin-bottom:12px;border-radius:14px;border:none;background:linear-gradient(90deg,#3b82f6,#2563eb);color:white;font-size:16px;font-weight:600;cursor:pointer;transition:.25s;}
 button:hover{transform:scale(1.04);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
 .back-btn{background:#1f2937;}
+.close-btn{background:#374151;}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);justify-content:center;align-items:center;}
-.modal-content{background:#111827;padding:25px;border-radius:20px;width:90%;max-width:480px;}
+.modal-content{background:#111827;padding:25px;border-radius:20px;width:90%;max-width:480px;animation:zoom .3s ease;}
 .products{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;}
-.product-card{background:#1e293b;border-radius:14px;padding:15px;transition:.3s;}
+.product-card{background:#1e293b;border-radius:14px;padding:15px;transition:.3s;animation:fadeIn .6s ease;}
+.product-card:hover{transform:scale(1.05);}
+.product-card:active{transform:scale(0.95);}
 .product-card img{width:100%;border-radius:10px;}
 table{width:100%;border-collapse:collapse;margin-top:10px;}
 th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);}
 th{background:#111827;}
 td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1);}}
 </style>
 </head>
 <body>
@@ -32,22 +38,9 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 <!-- HOME -->
 <div class="app" id="home">
 <div class="header"><div class="avatar">CJ</div><h1>CJAYSHOP</h1><p>Boutique Premium Crypto</p></div>
-
-<div class="card balance">
-<span>Solde</span>
-<span class="amount" id="balance">0€</span>
-</div>
-
-<div class="card">
-<h3>Programme fidélité</h3>
-<p>500€ rechargés = 100€ bonus</p>
-</div>
-
-<div class="card">
-<h3>📦 Historique des commandes</h3>
-<div id="orders"></div>
-</div>
-
+<div class="card balance"><span>Solde</span><span class="amount" id="balance">0€</span></div>
+<div class="card"><h3>Programme fidélité</h3><p>500€ rechargés = 100€ bonus</p></div>
+<div class="card"><h3>📦 Historique des commandes</h3><div id="orders"></div></div>
 <div class="actions">
 <button onclick="openShop()">🛒 Ouvrir la boutique</button>
 <button onclick="openDeposit()">💳 Recharger</button>
@@ -58,16 +51,8 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 
 <!-- SHOP -->
 <div id="shopPage" class="app" style="display:none">
-<div class="card">
-<h3>🛒 Boutique</h3>
-<div class="products" id="productsList"></div>
-
-<div class="card">
-<h3>🛍 Panier</h3>
-<div id="cartList"></div>
-<button onclick="checkout()">💳 Acheter le panier</button>
-</div>
-
+<div class="card"><h3>🛒 Boutique</h3><div class="products" id="productsList"></div>
+<div class="card"><h3>🛍 Panier</h3><div id="cartList"></div><button onclick="checkout()">💳 Acheter le panier</button></div>
 <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
 </div>
 </div>
@@ -80,8 +65,6 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 <button onclick="showProductsDashboard()">📦 Produits</button>
 <button onclick="showUsersDashboard()">👥 Utilisateurs</button>
 <button onclick="showStats()">📊 Statistiques</button>
-<button onclick="exportData()">💾 Export JSON</button>
-<button onclick="importData()">📂 Import JSON</button>
 <button class="back-btn" onclick="closeAdmin()">⬅ Fermer</button>
 </div>
 <div id="adminContent"></div>
@@ -92,6 +75,9 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 <div id="modal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
 <script>
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if(tg){tg.expand();}
+
 /* ===== VARIABLES ===== */
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let products = JSON.parse(localStorage.getItem("products")) || [];
@@ -99,91 +85,123 @@ let orders = JSON.parse(localStorage.getItem("orders")) || [];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
 let cart = [];
 
-let currentUserId = prompt("Entrez votre ID utilisateur :");
-if(!users[currentUserId]) users[currentUserId]={username:currentUserId,balance:500,orders:[],deposits:0,refunds:0};
-document.getElementById("balance").innerText = users[currentUserId].balance+"€";
+// ID automatique utilisateur
+function generateId(){return 'user'+Math.random().toString(36).substr(2,9);}
+let currentUserId = localStorage.getItem("currentUserId");
+if(!currentUserId){
+  currentUserId = generateId();
+  localStorage.setItem("currentUserId",currentUserId);
+}
+if(!users[currentUserId]) users[currentUserId]={username:currentUserId,balance:0,deposits:0,refunds:0,orders:[]};
+localStorage.setItem("users",JSON.stringify(users));
+let balance = users[currentUserId].balance || 0;
+document.getElementById("balance").innerText = balance+"€";
 
-/* ===== BOUTIQUE & PANIER ===== */
+/* ===== COMMANDE & PANIER ===== */
+function updateOrders(){
+  const container=document.getElementById("orders");
+  const uOrders=orders.filter(o=>o.userId===currentUserId);
+  container.innerHTML=uOrders.length? uOrders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("") : "<p>Aucune commande</p>";
+}
+
 function renderProducts(){
-  const container = document.getElementById("productsList");
-  container.innerHTML = "";
-  if(products.length===0){container.innerHTML="<p>Aucun produit disponible</p>"; return;}
+  const container=document.getElementById("productsList");
+  container.innerHTML="";
+  if(products.length===0){container.innerHTML="<p>Aucun produit disponible</p>";return;}
   products.forEach((p,i)=>{
-    container.innerHTML += `<div class="product-card">
+    container.innerHTML+=`<div class="product-card">
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>${p.desc}</p>
-      <button onclick="addToCart(${i})">Acheter ${p.price}€</button>
+      <button onclick="addToCart('${p.name}',${p.price},'${p.content}')">Acheter ${p.price}€</button>
     </div>`;
   });
 }
 
-function addToCart(i){
-  let p = products[i];
-  if(cart.find(c=>c.name===p.name)) return alert("Déjà dans le panier");
-  cart.push(p);
+function addToCart(name,price,content){
+  if(cart.find(p=>p.name===name)){alert("Déjà dans le panier");return;}
+  cart.push({name,price,content});
   renderCart();
 }
 
-function removeFromCart(i){cart.splice(i,1);renderCart();}
+function removeFromCart(index){cart.splice(index,1);renderCart();}
 
 function renderCart(){
-  const container = document.getElementById("cartList");
-  container.innerHTML = cart.length===0 ? "<p>Panier vide</p>" : cart.map((p,i)=>`<div>${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})">❌</button></div>`).join("");
-}
-
-function updateOrders(){
-  const container = document.getElementById("orders");
-  let uOrders = orders.filter(o=>o.userId===currentUserId);
-  container.innerHTML = uOrders.length ? uOrders.map(o=>`<div>${o.name} - ${o.price}€<br>Contenu privé: ${o.content}</div>`).join("") : "<p>Aucune commande</p>";
+  const container=document.getElementById("cartList");
+  if(cart.length===0){container.innerHTML="<p>Panier vide</p>";return;}
+  container.innerHTML = cart.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`).join("");
 }
 
 function checkout(){
-  if(cart.length===0){alert("Panier vide"); return;}
-  let total = cart.reduce((s,p)=>s+p.price,0);
-  if(total>users[currentUserId].balance) return alert("Solde insuffisant");
-  users[currentUserId].balance -= total;
+  if(cart.length===0){alert("Panier vide");return;}
+  let total=cart.reduce((s,p)=>s+p.price,0);
+  if(total>balance){alert("Solde insuffisant");return;}
+  balance-=total;
+  users[currentUserId].balance=balance;
   cart.forEach(p=>{
     orders.push({...p,userId:currentUserId});
     users[currentUserId].orders.push({...p,userId:currentUserId});
+    removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-  cart = [];
   localStorage.setItem("users",JSON.stringify(users));
-  localStorage.setItem("products",JSON.stringify(products));
   localStorage.setItem("orders",JSON.stringify(orders));
-  document.getElementById("balance").innerText = users[currentUserId].balance+"€";
+  localStorage.setItem("products",JSON.stringify(products));
+  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
+  cart=[];
   renderCart(); renderProducts(); updateOrders();
-  alert("Achat réussi !");
+  document.getElementById("balance").innerText=balance+"€";
+  alert("Achat réussi ! Contenu privé disponible dans l'historique.");
 }
 
 /* ===== NAVIGATION ===== */
-function openShop(){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="block"; renderProducts();}
+function openShop(){document.getElementById("home").style.display="none";document.getElementById("shopPage").style.display="block";}
 function closeShop(){document.getElementById("home").style.display="block";document.getElementById("shopPage").style.display="none";}
 
-/* ===== DEPÔT CRYPTO ===== */
-const addresses={BTC:"bc1...",ETH:"0x...",USDT:"0x...",USDC:"0x..."};
+/* ===== DEPOT CRYPTO ===== */
+const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
+
 function openDeposit(){
   document.getElementById("modal").style.display="flex";
-  document.getElementById("modalContent").innerHTML=`<h3>💰 DÉPÔT CRYPTO</h3>
-    <div><button onclick="selectCrypto('USDT')">USDT</button>
-    <button onclick="selectCrypto('USDC')">USDC</button>
-    <button onclick="selectCrypto('BTC')">BTC</button>
-    <button onclick="selectCrypto('ETH')">ETH</button>
-    <button onclick="closeModal()">⬅ Retour</button></div>`;
+  document.getElementById("modalContent").innerHTML=`
+    <h3>💰 DÉPÔT CRYPTO</h3>
+    <div class="grid">
+      <button onclick="selectCrypto('USDT')">USDT</button>
+      <button onclick="selectCrypto('USDC')">USDC</button>
+      <button onclick="selectCrypto('BTC')">BTC</button>
+      <button onclick="selectCrypto('ETH')">ETH</button>
+      <button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
+    </div>`;
 }
+
 function selectCrypto(c){
-  document.getElementById("modalContent").innerHTML=`<h3>${c}</h3><p style="word-break:break-all">${addresses[c]}</p>
-  <button onclick="copyAddress('${addresses[c]}')">Copier</button>
-  <button onclick="openDeposit()">⬅ Retour</button>`;
+  document.getElementById("modalContent").innerHTML=`
+    <h3>Dépôt ${c}</h3>
+    <p style="word-break:break-all">${addresses[c]}</p>
+    <input type="number" id="depositAmount" placeholder="Montant (€)" style="width:100%;margin:5px 0;padding:8px;">
+    <button onclick="validateDeposit('${c}')">💳 Déposer</button>
+    <button class="back-btn" onclick="openDeposit()">⬅ Retour</button>`;
 }
-function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée");}
+
+function validateDeposit(c){
+  const amount=parseFloat(document.getElementById("depositAmount").value);
+  if(isNaN(amount)||amount<=0){alert("Montant invalide");return;}
+  balance+=amount;
+  users[currentUserId].balance=balance;
+  users[currentUserId].deposits=(users[currentUserId].deposits||0)+amount;
+  localStorage.setItem("users",JSON.stringify(users));
+  localStorage.setItem("balance",balance);
+  document.getElementById("balance").innerText=balance+"€";
+  alert("Dépôt réussi !");
+  closeModal();
+}
+
 function closeModal(){document.getElementById("modal").style.display="none";}
 function support(){alert("Support bientôt disponible");}
 
 /* ===== PANEL ADMIN ===== */
 function openAdmin(){
-  let pwd = prompt("Mot de passe admin:");
+  let pwd=prompt("Mot de passe admin:");
   if(pwd==="GABON241"){
     document.getElementById("home").style.display="none";
     document.getElementById("shopPage").style.display="none";
@@ -194,7 +212,7 @@ function closeAdmin(){document.getElementById("adminPanel").style.display="none"
 
 /* ===== DASHBOARD PRODUITS ===== */
 function showProductsDashboard(){
-  let html = `<h4>Produits</h4><table>
+  let html=`<h4>Produits disponibles</h4><table>
   <tr><th>Image</th><th>Nom</th><th>Prix</th><th>Description</th><th>Contenu privé</th><th>Actions</th></tr>`;
   products.forEach((p,i)=>{
     html+=`<tr>
@@ -205,53 +223,63 @@ function showProductsDashboard(){
       <td>${p.content?"✅":"❌"} <button onclick="editPrivateContent(${i})">✏️</button></td>
       <td>
         <button onclick="editProduct(${i})">✏️ Nom/Prix</button>
-        <button onclick="editImage(${i})">🖼</button>
+        <button onclick="editImage(${i})">🖼 Modifier image</button>
         <button onclick="removeProduct(${i})">🗑</button>
-      </td></tr>`;
+      </td>
+    </tr>`;
   });
   html+=`</table><button onclick="addProductPrompt()">➕ Ajouter produit</button>`;
   document.getElementById("adminContent").innerHTML=html;
 }
-function addProductPrompt(){
-  let name=prompt("Nom"); if(!name)return;
-  let price=parseFloat(prompt("Prix")); if(isNaN(price))return;
-  let img=prompt("Image URL"); let desc=prompt("Description"); let content=prompt("Contenu privé");
-  products.push({name,price,img,desc,content});
-  localStorage.setItem("products",JSON.stringify(products));
-  showProductsDashboard(); renderProducts();
-}
-function editProduct(i){let p=products[i]; let n=prompt("Nom",p.name); if(!n)return; let pr=parseFloat(prompt("Prix",p.price)); if(isNaN(pr))return; products[i].name=n; products[i].price=pr; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard(); renderProducts();}
-function editDescription(i){let newD=prompt("Description",products[i].desc); if(newD!==null){products[i].desc=newD; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard(); renderProducts();}}
-function editImage(i){let newI=prompt("Image URL",products[i].img); if(newI!==null){products[i].img=newI; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard(); renderProducts();}}
-function editPrivateContent(i){let newC=prompt("Contenu privé",products[i].content||""); if(newC!==null){products[i].content=newC; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard();}}
-function removeProduct(i){removedProducts.push(products[i]); products.splice(i,1); localStorage.setItem("products",JSON.stringify(products)); localStorage.setItem("removedProducts",JSON.stringify(removedProducts)); showProductsDashboard(); renderProducts();}
 
 /* ===== DASHBOARD UTILISATEURS ===== */
 function showUsersDashboard(){
   let html=`<h4>Utilisateurs</h4><table>
-  <tr><th>ID</th><th>Solde</th><th>Dépôts</th><th>Refunds</th><th>Actions</th></tr>`;
+  <tr><th>Username</th><th>ID</th><th>Solde</th><th>Dépôts</th><th>Refunds</th><th>Actions</th></tr>`;
   Object.keys(users).forEach(id=>{
     let u=users[id];
     html+=`<tr>
-    <td>${id}</td><td>${u.balance||0}€ <button onclick="adjustBalance('${id}')">💰</button></td>
-    <td>${u.deposits||0}</td><td>${u.refunds||0} <button onclick="resetRefund('${id}')">🔄</button></td>
-    <td><button onclick="viewUserOrders('${id}')">📦 Commandes</button></td></tr>`;
+      <td>${u.username||"N/A"}</td>
+      <td>${id}</td>
+      <td>${u.balance||0}€ <button onclick="adjustBalance('${id}')">💰</button></td>
+      <td>${u.deposits||0}€</td>
+      <td>${u.refunds||0}/3 <button onclick="resetRefund('${id}')">🔄</button></td>
+      <td><button onclick="viewUserOrders('${id}')">📦 Commandes</button></td>
+    </tr>`;
   });
-  html+="</table>"; document.getElementById("adminContent").innerHTML=html;
+  html+=`</table>`;
+  document.getElementById("adminContent").innerHTML=html;
 }
-function adjustBalance(id){let val=parseFloat(prompt("Solde",users[id].balance||0)); if(!isNaN(val)){users[id].balance=val; localStorage.setItem("users",JSON.stringify(users)); showUsersDashboard();}}
-function resetRefund(id){users[id].refunds=0; localStorage.setItem("users",JSON.stringify(users)); showUsersDashboard();}
-function viewUserOrders(id){let uOrders=orders.filter(o=>o.userId===id); if(uOrders.length===0){alert("Pas de commandes"); return;} let html=uOrders.map(o=>`${o.name} - ${o.price}€<br>Contenu privé: ${o.content}`).join("<hr>"); document.getElementById("modal").style.display="flex"; document.getElementById("modalContent").innerHTML=`<h4>Commandes de ${id}</h4>${html}<button onclick="closeModal()">⬅ Retour</button>`;}
+
+function adjustBalance(id){
+  let val=parseFloat(prompt("Nouveau solde:",users[id].balance||0));
+  if(!isNaN(val)){users[id].balance=val;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
+}
+
+function resetRefund(id){users[id].refunds=0;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
+
+function viewUserOrders(id){
+  let uOrders=orders.filter(o=>o.userId===id);
+  if(uOrders.length===0){alert("Pas de commandes");return;}
+  let html=uOrders.map(o=>`${o.name} - ${o.price}€<br>Contenu privé: ${o.content}`).join("<hr>");
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalContent").innerHTML=`<h4>Commandes de ${id}</h4>${html}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
+}
 
 /* ===== STATISTIQUES ===== */
-function showStats(){let totalSales=orders.reduce((s,o)=>s+o.price,0); let totalDeposits=Object.values(users).reduce((s,u)=>s+(u.deposits||0),0); let html=`<h4>📊 Statistiques</h4><p>Total ventes: ${totalSales}€</p><p>Total dépôts: ${totalDeposits}€</p><p>Nombre utilisateurs: ${Object.keys(users).length}</p>`; document.getElementById("adminContent").innerHTML=html;}
-
-/* ===== EXPORT/IMPORT ===== */
-function exportData(){const data={users,products,orders}; const blob=new Blob([JSON.stringify(data)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url;a.download="backup.json";a.click();URL.revokeObjectURL(url);}
-function importData(){const input=document.createElement("input"); input.type="file"; input.accept=".json"; input.onchange=e=>{const file=e.target.files[0]; const reader=new FileReader(); reader.onload=ev=>{const data=JSON.parse(ev.target.result); users=data.users||users; products=data.products||products; orders=data.orders||orders; localStorage.setItem("users",JSON.stringify(users)); localStorage.setItem("products",JSON.stringify(products)); localStorage.setItem("orders",JSON.stringify(orders)); alert("Import terminé"); showProductsDashboard(); showUsersDashboard(); showStats(); renderProducts(); updateOrders();}; reader.readAsText(file);}; input.click();}
+function showStats(){
+  let totalSales=orders.reduce((s,o)=>s+o.price,0);
+  let totalDeposits=Object.values(users).reduce((s,u)=>s+(u.deposits||0),0);
+  let html=`<h4>📊 Statistiques</h4>
+  <p>Total ventes : ${totalSales}€</p>
+  <p>Total dépôts utilisateurs : ${totalDeposits}€</p>
+  <p>Nombre utilisateurs : ${Object.keys(users).length}</p>`;
+  document.getElementById("adminContent").innerHTML=html;
+}
 
 /* ===== INIT ===== */
 renderProducts(); renderCart(); updateOrders();
 </script>
+
 </body>
 </html>
