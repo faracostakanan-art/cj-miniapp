@@ -20,6 +20,9 @@ button:hover{transform:scale(1.04);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
 .close-btn{background:#374151;}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);justify-content:center;align-items:center;}
 .modal-content{background:#111827;padding:25px;border-radius:20px;width:90%;max-width:480px;animation:zoom .3s ease;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;}
+.full{grid-column:1/3;}
+.info{margin:6px 0;font-size:14px;}
 .products{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;}
 .product-card{background:#1e293b;border-radius:14px;padding:15px;transition:.3s;animation:fadeIn .6s ease;}
 .product-card:hover{transform:scale(1.05);}
@@ -30,7 +33,7 @@ th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);
 th{background:#111827;}
 td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1);}}
+@keyframes zoom{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1);}
 </style>
 </head>
 <body>
@@ -38,9 +41,22 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 <!-- HOME -->
 <div class="app" id="home">
 <div class="header"><div class="avatar">CJ</div><h1>CJAYSHOP</h1><p>Boutique Premium Crypto</p></div>
-<div class="card balance"><span>Solde</span><span class="amount" id="balance">0€</span></div>
-<div class="card"><h3>Programme fidélité</h3><p>500€ rechargés = 100€ bonus</p></div>
-<div class="card"><h3>📦 Historique des commandes</h3><div id="orders"></div></div>
+
+<div class="card balance">
+<span>Solde</span>
+<span class="amount" id="balance">0€</span>
+</div>
+
+<div class="card">
+<h3>Programme fidélité</h3>
+<p>500€ rechargés = 100€ bonus</p>
+</div>
+
+<div class="card">
+<h3>📦 Historique des commandes</h3>
+<div id="orders"></div>
+</div>
+
 <div class="actions">
 <button onclick="openShop()">🛒 Ouvrir la boutique</button>
 <button onclick="openDeposit()">💳 Recharger</button>
@@ -51,8 +67,16 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 
 <!-- SHOP -->
 <div id="shopPage" class="app" style="display:none">
-<div class="card"><h3>🛒 Boutique</h3><div class="products" id="productsList"></div>
-<div class="card"><h3>🛍 Panier</h3><div id="cartList"></div><button onclick="checkout()">💳 Acheter le panier</button></div>
+<div class="card">
+<h3>🛒 Boutique</h3>
+<div class="products" id="productsList"></div>
+
+<div class="card">
+<h3>🛍 Panier</h3>
+<div id="cartList"></div>
+<button onclick="checkout()">💳 Acheter le panier</button>
+</div>
+
 <button class="back-btn" onclick="closeShop()">⬅ Retour</button>
 </div>
 </div>
@@ -76,40 +100,31 @@ td button{width:auto;padding:6px 10px;margin:0 2px;font-size:14px;}
 
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
-if(tg){tg.expand();}
+if(tg){ tg.expand(); }
 
 /* ===== VARIABLES ===== */
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let products = JSON.parse(localStorage.getItem("products")) || [];
+let balance = parseFloat(localStorage.getItem("balance")) || 0;
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
+let products = JSON.parse(localStorage.getItem("products")) || [];
 let removedProducts = JSON.parse(localStorage.getItem("removedProducts")) || [];
-let cart = [];
+let users = JSON.parse(localStorage.getItem("users")) || {}; 
 
-// ID automatique utilisateur
-function generateId(){return 'user'+Math.random().toString(36).substr(2,9);}
-let currentUserId = localStorage.getItem("currentUserId");
-if(!currentUserId){
-  currentUserId = generateId();
-  localStorage.setItem("currentUserId",currentUserId);
-}
-if(!users[currentUserId]) users[currentUserId]={username:currentUserId,balance:0,deposits:0,refunds:0,orders:[]};
-localStorage.setItem("users",JSON.stringify(users));
-let balance = users[currentUserId].balance || 0;
 document.getElementById("balance").innerText = balance+"€";
 
-/* ===== COMMANDE & PANIER ===== */
+/* ===== COMMANDES & PANIER ===== */
 function updateOrders(){
-  const container=document.getElementById("orders");
-  const uOrders=orders.filter(o=>o.userId===currentUserId);
-  container.innerHTML=uOrders.length? uOrders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("") : "<p>Aucune commande</p>";
+  const container = document.getElementById("orders");
+  container.innerHTML = orders.map(o=>`<div class="info">${o.name} - ${o.price}€<br><small>${o.content}</small></div>`).join("");
 }
+updateOrders();
 
+let cart = [];
 function renderProducts(){
-  const container=document.getElementById("productsList");
-  container.innerHTML="";
-  if(products.length===0){container.innerHTML="<p>Aucun produit disponible</p>";return;}
-  products.forEach((p,i)=>{
-    container.innerHTML+=`<div class="product-card">
+  const container = document.getElementById("productsList");
+  container.innerHTML = "";
+  if(products.length===0){container.innerHTML="<p>Aucun produit disponible</p>"; return;}
+  products.forEach(p=>{
+    container.innerHTML += `<div class="product-card">
       <img src="${p.img}">
       <h4>${p.name}</h4>
       <p>${p.desc}</p>
@@ -117,40 +132,39 @@ function renderProducts(){
     </div>`;
   });
 }
-
 function addToCart(name,price,content){
-  if(cart.find(p=>p.name===name)){alert("Déjà dans le panier");return;}
+  if(cart.find(p=>p.name===name)){alert("Déjà dans le panier"); return;}
   cart.push({name,price,content});
   renderCart();
 }
-
 function removeFromCart(index){cart.splice(index,1);renderCart();}
-
 function renderCart(){
-  const container=document.getElementById("cartList");
-  if(cart.length===0){container.innerHTML="<p>Panier vide</p>";return;}
+  const container = document.getElementById("cartList");
+  if(cart.length===0){container.innerHTML="<p>Panier vide</p>"; return;}
   container.innerHTML = cart.map((p,i)=>`<div class="info">${p.name} - ${p.price}€ <button onclick="removeFromCart(${i})" style="float:right">❌</button></div>`).join("");
 }
-
 function checkout(){
-  if(cart.length===0){alert("Panier vide");return;}
-  let total=cart.reduce((s,p)=>s+p.price,0);
-  if(total>balance){alert("Solde insuffisant");return;}
-  balance-=total;
-  users[currentUserId].balance=balance;
+  if(cart.length===0){alert("Panier vide"); return;}
+  let total = cart.reduce((s,p)=>s+p.price,0);
+  if(total>balance){alert("Solde insuffisant"); return;}
+  balance -= total;
+  localStorage.setItem("balance",balance);
+  document.getElementById("balance").innerText = balance+"€";
+
   cart.forEach(p=>{
-    orders.push({...p,userId:currentUserId});
-    users[currentUserId].orders.push({...p,userId:currentUserId});
+    orders.push({name:p.name,price:p.price,content:p.content});
     removedProducts.push(p);
     products = products.filter(prod=>prod.name!==p.name);
   });
-  localStorage.setItem("users",JSON.stringify(users));
-  localStorage.setItem("orders",JSON.stringify(orders));
-  localStorage.setItem("products",JSON.stringify(products));
-  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
-  cart=[];
-  renderCart(); renderProducts(); updateOrders();
-  document.getElementById("balance").innerText=balance+"€";
+
+  localStorage.setItem("orders", JSON.stringify(orders));
+  localStorage.setItem("removedProducts", JSON.stringify(removedProducts));
+  localStorage.setItem("products", JSON.stringify(products));
+
+  cart = [];
+  renderCart();
+  renderProducts();
+  updateOrders();
   alert("Achat réussi ! Contenu privé disponible dans l'historique.");
 }
 
@@ -160,7 +174,6 @@ function closeShop(){document.getElementById("home").style.display="block";docum
 
 /* ===== DEPOT CRYPTO ===== */
 const addresses={BTC:"bc1q5t9rtfkjlkj4f3hr4kh9j5khcwqz52lv03dkrr",ETH:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDT:"0x5A652C891ee6F1cAF45c829A0e42f81856524939",USDC:"0x5A652C891ee6F1cAF45c829A0e42f81856524939"};
-
 function openDeposit(){
   document.getElementById("modal").style.display="flex";
   document.getElementById("modalContent").innerHTML=`
@@ -173,49 +186,34 @@ function openDeposit(){
       <button class="full back-btn" onclick="closeModal()">⬅ Retour</button>
     </div>`;
 }
-
 function selectCrypto(c){
   document.getElementById("modalContent").innerHTML=`
     <h3>Dépôt ${c}</h3>
     <p style="word-break:break-all">${addresses[c]}</p>
-    <input type="number" id="depositAmount" placeholder="Montant (€)" style="width:100%;margin:5px 0;padding:8px;">
-    <button onclick="validateDeposit('${c}')">💳 Déposer</button>
+    <button onclick="copyAddress('${addresses[c]}')">Copier</button>
     <button class="back-btn" onclick="openDeposit()">⬅ Retour</button>`;
 }
-
-function validateDeposit(c){
-  const amount=parseFloat(document.getElementById("depositAmount").value);
-  if(isNaN(amount)||amount<=0){alert("Montant invalide");return;}
-  balance+=amount;
-  users[currentUserId].balance=balance;
-  users[currentUserId].deposits=(users[currentUserId].deposits||0)+amount;
-  localStorage.setItem("users",JSON.stringify(users));
-  localStorage.setItem("balance",balance);
-  document.getElementById("balance").innerText=balance+"€";
-  alert("Dépôt réussi !");
-  closeModal();
-}
-
+function copyAddress(a){navigator.clipboard.writeText(a); alert("Adresse copiée");}
 function closeModal(){document.getElementById("modal").style.display="none";}
 function support(){alert("Support bientôt disponible");}
 
 /* ===== PANEL ADMIN ===== */
 function openAdmin(){
-  let pwd=prompt("Mot de passe admin:");
+  let pwd = prompt("Mot de passe admin:");
   if(pwd==="GABON241"){
     document.getElementById("home").style.display="none";
     document.getElementById("shopPage").style.display="none";
     document.getElementById("adminPanel").style.display="block";
-  }else alert("Mot de passe incorrect");
+  }else{alert("Mot de passe incorrect");}
 }
 function closeAdmin(){document.getElementById("adminPanel").style.display="none";document.getElementById("home").style.display="block";}
 
 /* ===== DASHBOARD PRODUITS ===== */
 function showProductsDashboard(){
-  let html=`<h4>Produits disponibles</h4><table>
-  <tr><th>Image</th><th>Nom</th><th>Prix</th><th>Description</th><th>Contenu privé</th><th>Actions</th></tr>`;
+  let html = `<h4>Produits disponibles</h4><table>
+    <tr><th>Image</th><th>Nom</th><th>Prix</th><th>Description</th><th>Contenu privé</th><th>Actions</th></tr>`;
   products.forEach((p,i)=>{
-    html+=`<tr>
+    html += `<tr>
       <td><img src="${p.img}" style="width:50px"></td>
       <td>${p.name}</td>
       <td>${p.price}€</td>
@@ -228,17 +226,57 @@ function showProductsDashboard(){
       </td>
     </tr>`;
   });
-  html+=`</table><button onclick="addProductPrompt()">➕ Ajouter produit</button>`;
-  document.getElementById("adminContent").innerHTML=html;
+  html += `</table><button onclick="addProductPrompt()">➕ Ajouter produit</button>`;
+  document.getElementById("adminContent").innerHTML = html;
+}
+function addProductPrompt(){
+  let name = prompt("Nom du produit:"); if(!name) return;
+  let price = parseFloat(prompt("Prix (€):")); if(isNaN(price)) return;
+  let img = prompt("URL image:");
+  let desc = prompt("Description:");
+  let content = prompt("Contenu privé:");
+  products.push({name,price,img,desc,content});
+  localStorage.setItem("products", JSON.stringify(products));
+  showProductsDashboard(); renderProducts();
+}
+function editProduct(index){
+  let p = products[index];
+  let name = prompt("Nom du produit:",p.name); if(!name) return;
+  let price = parseFloat(prompt("Prix (€):",p.price)); if(isNaN(price)) return;
+  products[index].name=name; products[index].price=price;
+  localStorage.setItem("products", JSON.stringify(products));
+  showProductsDashboard(); renderProducts();
+}
+function editDescription(index){
+  let current = products[index].desc || "";
+  let newDesc = prompt("Modifier la description:", current);
+  if(newDesc!==null){products[index].desc=newDesc; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard(); renderProducts();}
+}
+function editImage(index){
+  let current = products[index].img || "";
+  let newImg = prompt("Modifier l'image:", current);
+  if(newImg!==null){products[index].img=newImg; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard(); renderProducts();}
+}
+function editPrivateContent(index){
+  let current = products[index].content || "";
+  let newContent = prompt("Modifier le contenu privé:", current);
+  if(newContent!==null){products[index].content=newContent; localStorage.setItem("products",JSON.stringify(products)); showProductsDashboard();}
+}
+function removeProduct(index){
+  removedProducts.push(products[index]);
+  products.splice(index,1);
+  localStorage.setItem("products",JSON.stringify(products));
+  localStorage.setItem("removedProducts",JSON.stringify(removedProducts));
+  showProductsDashboard(); renderProducts();
 }
 
 /* ===== DASHBOARD UTILISATEURS ===== */
 function showUsersDashboard(){
-  let html=`<h4>Utilisateurs</h4><table>
-  <tr><th>Username</th><th>ID</th><th>Solde</th><th>Dépôts</th><th>Refunds</th><th>Actions</th></tr>`;
+  let html = `<h4>Utilisateurs</h4><table>
+    <tr><th>Username</th><th>ID</th><th>Solde</th><th>Dépôts</th><th>Refunds</th><th>Actions</th></tr>`;
   Object.keys(users).forEach(id=>{
-    let u=users[id];
-    html+=`<tr>
+    let u = users[id];
+    html += `<tr>
       <td>${u.username||"N/A"}</td>
       <td>${id}</td>
       <td>${u.balance||0}€ <button onclick="adjustBalance('${id}')">💰</button></td>
@@ -247,39 +285,30 @@ function showUsersDashboard(){
       <td><button onclick="viewUserOrders('${id}')">📦 Commandes</button></td>
     </tr>`;
   });
-  html+=`</table>`;
-  document.getElementById("adminContent").innerHTML=html;
+  html += `</table>`; document.getElementById("adminContent").innerHTML = html;
 }
-
-function adjustBalance(id){
-  let val=parseFloat(prompt("Nouveau solde:",users[id].balance||0));
-  if(!isNaN(val)){users[id].balance=val;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
-}
-
-function resetRefund(id){users[id].refunds=0;localStorage.setItem("users",JSON.stringify(users));showUsersDashboard();}
-
+function adjustBalance(id){ let val = parseFloat(prompt("Nouveau solde:",users[id].balance||0)); if(!isNaN(val)){users[id].balance=val; localStorage.setItem("users",JSON.stringify(users)); showUsersDashboard();}}
+function resetRefund(id){users[id].refunds=0; localStorage.setItem("users",JSON.stringify(users)); showUsersDashboard();}
 function viewUserOrders(id){
-  let uOrders=orders.filter(o=>o.userId===id);
-  if(uOrders.length===0){alert("Pas de commandes");return;}
-  let html=uOrders.map(o=>`${o.name} - ${o.price}€<br>Contenu privé: ${o.content}`).join("<hr>");
+  let uOrders = orders.filter(o=>o.userId===id);
+  if(uOrders.length===0){alert("Pas de commandes"); return;}
+  let html = uOrders.map(o=>`${o.name} - ${o.price}€<br>Contenu privé: ${o.content}`).join("<hr>");
   document.getElementById("modal").style.display="flex";
-  document.getElementById("modalContent").innerHTML=`<h4>Commandes de ${id}</h4>${html}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
+  document.getElementById("modalContent").innerHTML = `<h4>Commandes de ${id}</h4>${html}<button class="back-btn" onclick="closeModal()">⬅ Retour</button>`;
 }
 
 /* ===== STATISTIQUES ===== */
 function showStats(){
-  let totalSales=orders.reduce((s,o)=>s+o.price,0);
-  let totalDeposits=Object.values(users).reduce((s,u)=>s+(u.deposits||0),0);
-  let html=`<h4>📊 Statistiques</h4>
-  <p>Total ventes : ${totalSales}€</p>
-  <p>Total dépôts utilisateurs : ${totalDeposits}€</p>
-  <p>Nombre utilisateurs : ${Object.keys(users).length}</p>`;
-  document.getElementById("adminContent").innerHTML=html;
+  let totalSales = orders.reduce((s,o)=>s+o.price,0);
+  let totalDeposits = Object.values(users).reduce((s,u)=>s+(u.deposits||0),0);
+  let html = `<h4>📊 Statistiques</h4>
+    <p>Total ventes : ${totalSales}€</p>
+    <p>Total dépôts utilisateurs : ${totalDeposits}€</p>
+    <p>Nombre utilisateurs : ${Object.keys(users).length}</p>`;
+  document.getElementById("adminContent").innerHTML = html;
 }
 
-/* ===== INIT ===== */
-renderProducts(); renderCart(); updateOrders();
+renderProducts(); renderCart();
 </script>
-
 </body>
 </html>
