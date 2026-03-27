@@ -28,8 +28,7 @@ bot.onText(/\/start/, (msg) => {
 
 const chatId = msg.chat.id;
 
-bot.sendMessage(chatId, welcomeMessage);
-
+bot.sendMessage(chatId, welcomeMessage bienvenue sur cjbot);
 });
 
 console.log("Bot lancé...");
